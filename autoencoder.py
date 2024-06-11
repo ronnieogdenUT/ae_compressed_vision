@@ -1,6 +1,10 @@
 import torch
 from torchvision import datasets
 import matplotlib.pyplot as plt
+import torchvision.transforms.functional as tf
+import numpy as np
+import torch.nn as nn
+import matplotlib.animation as animation
 
 
 train_data = datasets.MovingMNIST(
@@ -16,7 +20,7 @@ train_data = datasets.MovingMNIST(
 
 batch_size = 32
 train_loader = torch.utils.data.DataLoader(
-    dataset = train_data, 
+    dataset = train_data, #####fix this later
     batch_size = batch_size, 
     shuffle = True
 )
@@ -31,20 +35,23 @@ device = (
 )
 print(f"Using {device} device")
 
+#Calculate Padding Size
+#padding = 2*(64 - 1) - 64 + 2  = 64
+#padding = Stride * (input Vol Size - 1) - input Vol Size + kernel size
 
 class resblock_a(torch.nn.Module):
     def __init__(self):
         super().__init__()
         
         self.conv_stack = torch.nn.Sequential(
-            torch.nn.Conv3d(128, 128, 3, stride=(1,2,2), padding='same'),
+            torch.nn.Conv3d(128, 128, 3, stride=1, padding='same'),
 			torch.nn.BatchNorm3d(128),
 			torch.nn.ReLU(),
-            torch.nn.Conv3d(128, 128, 3, stride=(1,2,2), padding='same'),
+            torch.nn.Conv3d(128, 128, 3, stride=1, padding='same'),
 			torch.nn.BatchNorm3d(128)
         )
         
-    def foward(self, x):
+    def forward(self, x):
         residual = x
         out = self.conv_stack(x) + residual
         return out
@@ -85,29 +92,29 @@ class resblock_c(torch.nn.Module):
 class Autoencoder(torch.nn.Module):
     def __init__(self, in_channels):
         super().__init__()
-		
+
         self.encoder = torch.nn.Sequential(
-            torch.nn.Conv3d(in_channels, 64, 5, stride=(1,2,2), padding='same'),
+            torch.nn.Conv3d(in_channels, 64, 5, stride=(1,2,2), padding='valid'),
 			torch.nn.BatchNorm3d(64),
 			torch.nn.ReLU(),
-            torch.nn.Conv3d(64, 128, 5, stride=(1,2,2), padding='same'),
+            torch.nn.Conv3d(64, 128, 5, stride=(1,2,2), padding='valid'),
 			torch.nn.BatchNorm3d(128),
 			torch.nn.ReLU(),
             resblock_c(),
-            torch.nn.Conv3d(128, 32, 5, stride=(1,2,2), padding='same'),
+            torch.nn.Conv3d(128, 32, 5, stride=(1,2,2), padding='valid'),
             torch.nn.BatchNorm3d(32)
 		)      
         
         # Figure out if resblock_c needs to be a transposed version... I think they are the same here		
         self.decoder = torch.nn.Sequential(
-			torch.nn.ConvTranspose3d(32, 128, 3, stride=(1,2,2), padding='same'),
+			torch.nn.ConvTranspose3d(32, 128, 3, stride=(1,2,2), padding= 0),
             torch.nn.BatchNorm3d(128),
 			torch.nn.ReLU(),
             resblock_c(),
-            torch.nn.ConvTranspose3d(128, 64, 5, stride=(1,2,2), padding='same'),
+            torch.nn.ConvTranspose3d(128, 64, 5, stride=(1,2,2), padding= 0),
             torch.nn.BatchNorm3d(64),
 			torch.nn.ReLU(),
-            torch.nn.ConvTranspose3d(64, in_channels, 5, stride=(1,2,2), padding='same'),
+            torch.nn.ConvTranspose3d(64, in_channels, 5, stride=(1,2,2), padding= 0),
             torch.nn.BatchNorm3d(in_channels)
 		)
 
@@ -115,43 +122,68 @@ class Autoencoder(torch.nn.Module):
         encoded = self.encoder(x)
         decoded = self.decoder(encoded)
         return decoded
-
-
-
+    
     
 
+in_channels = 1  # Assuming video frames
+model = Autoencoder(in_channels)
 
-# model = Autoencoder(in_channels)
 
-# loss_function = torch.nn.MSELoss()
+epochs = 2
+outputs = []
+losses = []
+for epoch in range(epochs):
+    
+    for video in train_loader:
 
-# optimizer = torch.optim.Adam(model.parameters(),
-# 							lr = 1e-4,
-# 							weight_decay = 1e-8)
+        # print(video.dtype)
+        video = video.to(torch.float32)
+        video = torch.permute(video, (0,2,1,3,4))
+        # video = tf.cast(video, tf.float32)
+        print(video.dtype)
+        print(video.size())
 
-# epochs = 2
-# outputs = []
-# losses = []
-# for epoch in range(epochs):
-#     for (image, _) in loader:
-# 	
-#         # Reshaping the image to (-1, 784)
-#         image = image.reshape(-1, 28*28)
-# 	
-#         # Output of Autoencoder
-#         reconstructed = model(image)
-# 	
-#         # Calculating the loss function
-#         loss = loss_function(reconstructed, image)
-# 	
-#         # The gradients are set to zero,
-#         # the gradient is computed and stored.
-#         # .step() performs parameter update
-#         optimizer.zero_grad()
-#         loss.backward()
-#         optimizer.step()
-# 	
-#         # Storing the losses in a list for plotting
-#         losses.append(loss)
-#     outputs.append((epochs, image, reconstructed))
+        # Output of Autoencoder
+        reconstructed = model(video)
+        
+        #Display Reconstructed vs Original
+
+        fig, ax = plt.subplots()
+        ims = []
+        sm1 = video[0]
+        sample1 = sm1[0]
+        sample1 = sample1.detach().numpy()
+        sm2 = reconstructed[0]
+        sample2 = sm2[0]
+        sample2 = sample2.detach().numpy()
+        sample_list = [sample1, sample2]
+        
+        for i in range(2):
+            sample = sample_list[i]
+            for j in range(17):
+                im = ax.imshow(sample[j], animated=True)
+                if j == 0:
+                    ax.imshow(sample[j])  # show an initial one first
+                ims.append([im])
+            ani = animation.ArtistAnimation(fig, ims, interval = 20, blit = True, repeat_delay = 1000)
+
+
+        plt.show()
+
+        # The gradients are set to zero, the gradient is computed and stored.
+        # .step() performs parameter update
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+        # Storing the losses in a list for plotting
+        losses.append(loss.item())
+    outputs.append((epoch, video, reconstructed))
+
+# Plotting the loss function
+plt.plot(losses)
+plt.xlabel('Iterations')
+plt.ylabel('Loss')
+plt.title('Training Loss')
+plt.show()
 
