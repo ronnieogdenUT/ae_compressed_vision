@@ -170,19 +170,22 @@ class Autoencoder(torch.nn.Module):
     
 #Training Method with MSE Loss Function and Adam Optimizer
 def train(dataloader, model, loss_fn, optimizer):
+    train_batches = 1 #Amount of Batches to work through per epoch
     output = []
     size = len(dataloader.dataset)
     model.train()
     batch_num = 1
+    batch_set = []
     for (batch_num, batch) in enumerate(dataloader):
+        batch = batch.to(device)
         print ("Batch: " + str(batch_num+1))
-        video = batch.to(torch.float32)
-        video = torch.permute(video, (0,2,1,3,4))
+        batch = batch.to(torch.float32)
+        batch = torch.permute(batch, (0,2,1,3,4))
         # Output of Autoencoder
-        reconstructed = model(video)
+        reconstructed = model(batch)
 
         #Calculate Loss
-        loss = loss_fn(reconstructed, video)
+        loss = loss_fn(reconstructed, batch)
 
         #Backpropagate
         # The gradients are set to zero, the gradient is computed and stored.
@@ -194,8 +197,9 @@ def train(dataloader, model, loss_fn, optimizer):
         # Storing the losses in a list for plotting
         losses.append(loss.item())
 
-        if (batch_num == 31):
+        if (batch_num == train_batches):
             break
+    print(reconstructed.size())
     return reconstructed
 
 
@@ -220,28 +224,18 @@ def test(dataloader, model, loss_fn):
     tot_loss = tot_loss/num_batches
     print ("Loss: " + tot_loss)
 
-def show():
+def show(batches_list):
     #Display Reconstructed vs Original
 
     fig, ax = plt.subplots()
     ims = []
-    sm1 = video[0]
-    sample1 = sm1[0]
-    sample1 = sample1.detach().numpy()
-    sm2 = reconstructed[0]
-    sample2 = sm2[0]
-    sample2 = sample2.detach().numpy()
-    sample_list = [sample1, sample2]
-    
-    for i in range(2):
-        sample = sample_list[i]
-        for j in range(17):
-            im = ax.imshow(sample[j], animated=True)
-            if j == 0:
-                ax.imshow(sample[j])  # show an initial one first
-            ims.append([im])
-        ani = animation.ArtistAnimation(fig, ims, interval = 20, blit = True, repeat_delay = 1000)
 
+    for batch in batches_list:
+        sample_video = batch[0]
+        for frame in sample_video:
+            im = ax.imshow(frame[0].cpu().detach().numpy(), animated = True)
+            ims.append([im])
+        ani = animation.ArtistAnimation(fig, ims, interval = 1000, blit = True, repeat_delay = 1000)
 
     plt.show()
 
@@ -250,15 +244,23 @@ def show():
 ####Main Running Function 
 
 in_channels = 1  # Assuming grayscale video frames
-model = Autoencoder(in_channels)
+model = Autoencoder(in_channels).to(device)
 loss_fn = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999))
-
 epochs = 3
 losses = []
+batches_list = []
+
+for batch in train_loader:
+    batches_list.append(batch)
+    break
+
 for epoch in range(epochs):
     print ("Epoch: " + str(epoch+1))
-    train(train_loader, model, loss_fn, optimizer)
+    batches_list.append(train(train_loader, model, loss_fn, optimizer))
+
+show(batches_list)
+
 """
 # Plotting the loss function
 plt.plot(losses)
