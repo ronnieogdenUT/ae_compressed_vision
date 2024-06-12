@@ -167,12 +167,6 @@ class Autoencoder(torch.nn.Module):
         pad_right = pad_along_width - pad_left
         output = (pad_left, pad_right, pad_top, pad_bottom, pad_forward, pad_backward)
         return output
-
-    def same_pad_decoder(self, x, stride, kernel):
-        size = x.size()
-        print(size)
-        output = (0,0,0,0,0,0)
-        return output
     
 #Training Method with MSE Loss Function and Adam Optimizer
 def train(dataloader, model, loss_fn, optimizer):
@@ -180,8 +174,8 @@ def train(dataloader, model, loss_fn, optimizer):
     size = len(dataloader.dataset)
     model.train()
     batch_num = 1
-    for batch in dataloader:
-        print ("Batch: " + str(batch_num))
+    for (batch_num, batch) in enumerate(dataloader):
+        print ("Batch: " + str(batch_num+1))
         video = batch.to(torch.float32)
         video = torch.permute(video, (0,2,1,3,4))
         # Output of Autoencoder
@@ -199,7 +193,9 @@ def train(dataloader, model, loss_fn, optimizer):
 
         # Storing the losses in a list for plotting
         losses.append(loss.item())
-        batch_num = batch_num + 1
+
+        if (batch_num == 31):
+            break
     return reconstructed
 
 
@@ -260,10 +256,8 @@ optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999))
 
 epochs = 3
 losses = []
-epoch = 1
 for epoch in range(epochs):
-    epoch = 1
-    print ("Epoch: " + str(epoch))
+    print ("Epoch: " + str(epoch+1))
     train(train_loader, model, loss_fn, optimizer)
 """
 # Plotting the loss function
