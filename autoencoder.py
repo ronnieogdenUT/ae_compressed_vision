@@ -2,9 +2,11 @@ import torch
 from torchvision import datasets
 import matplotlib.pyplot as plt
 import torchvision.transforms.functional as tf
+import torch.nn.functional as f
 import numpy as np
 import torch.nn as nn
 import matplotlib.animation as animation
+import math
 
 
 train_data = datasets.MovingMNIST(
@@ -20,7 +22,7 @@ train_data = datasets.MovingMNIST(
 
 batch_size = 32
 train_loader = torch.utils.data.DataLoader(
-    dataset = train_data, #####fix this later
+    dataset = train_data,
     batch_size = batch_size, 
     shuffle = True
 )
@@ -93,83 +95,93 @@ class Autoencoder(torch.nn.Module):
     def __init__(self, in_channels):
         super().__init__()
 
-        self.encoder = torch.nn.Sequential(
-            torch.nn.Conv3d(in_channels, 64, 5, stride=(1,2,2), padding='valid'),
-			torch.nn.BatchNorm3d(64),
-			torch.nn.ReLU(),
-            torch.nn.Conv3d(64, 128, 5, stride=(1,2,2), padding='valid'),
-			torch.nn.BatchNorm3d(128),
-			torch.nn.ReLU(),
-            resblock_c(),
-            torch.nn.Conv3d(128, 32, 5, stride=(1,2,2), padding='valid'),
-            torch.nn.BatchNorm3d(32)
-		)      
+        #Encoder
+        self.encoderConv1 = torch.nn.Conv3d(in_channels, 64, 5, stride=(1,2,2))
+        self.encoderBn1 = torch.nn.BatchNorm3d(64)
+        self.encoderConv2 = torch.nn.Conv3d(64, 128, 5, stride=(1,2,2))
+        self.encoderBn2 = torch.nn.BatchNorm3d(128)
+        self.encoderConv3 = torch.nn.Conv3d(128, 32, 5, stride=(1,2,2))
+        self.encoderBn3 = torch.nn.BatchNorm3d(32)   
         
         # Figure out if resblock_c needs to be a transposed version... I think they are the same here		
-        self.decoder = torch.nn.Sequential(
-			torch.nn.ConvTranspose3d(32, 128, 3, stride=(1,2,2), padding= 0),
-            torch.nn.BatchNorm3d(128),
-			torch.nn.ReLU(),
-            resblock_c(),
-            torch.nn.ConvTranspose3d(128, 64, 5, stride=(1,2,2), padding= 0),
-            torch.nn.BatchNorm3d(64),
-			torch.nn.ReLU(),
-            torch.nn.ConvTranspose3d(64, in_channels, 5, stride=(1,2,2), padding= 0),
-            torch.nn.BatchNorm3d(in_channels)
-		)
+        #Decoder
+        self.decoderConv1 = torch.nn.ConvTranspose3d(32, 128, 3, stride=(1,2,2), padding= 0)
+        self.decoderBn1 = torch.nn.BatchNorm3d(128)
+        self.decoderConv2 = torch.nn.ConvTranspose3d(128, 64, 5, stride=(1,2,2), padding= 0)
+        self.decoderBn2 = torch.nn.BatchNorm3d(64)
+        self.decoderConv3 = torch.nn.ConvTranspose3d(64, in_channels, 5, stride=(1,2,2), padding= 0)
+        self.decoderBn3 = torch.nn.BatchNorm3d(in_channels)
 
     def forward(self, x):
-        encoded = self.encoder(x)
-        decoded = self.decoder(encoded)
-        return decoded
+        stride = (1,2,2)
+        #Encoder
+        print(self.calc_pad(x, stride, 5))
+        f.pad(x, (2,1,1,2,1,2))
+        x = self.encoderConv1(x)
+        x = self.encoderBn1(x)
+        x = f.relu(x)
+        
+        x = self.encoderConv2(x)
+        x = self.encoderBn2(x)
+        x = f.relu(x)
+        resblock_c()
+
+        x = self.encoderConv3(x)
+        x = self.encoderBn3(x)
+
+        #Decoder
+        x = self.decoderConv1(x)
+        x = self.decoderBn1(x)
+        x = f.relu(x)
+        resblock_c()
+
+        x = self.decoderConv2(x)
+        x = self.decoderBn2(x)
+        x = f.relu(x)
+
+        x = self.decoderConv3(x)
+        x = self.decoderBn3(x)
+        
+        return x
     
+    #Calculates Padding(Mimics Tensor Flow padding = 'same')
+    def calc_pad(self, x, stride, kernel):
+        size = x.size()
+        print (size)
+        in_height = size[6]
+        in_width = size[5]
+        filter_height = kernel[0]
+        filter_width = kernel[1]
+
+        out_height = math.ceil(float(in_height) / float(stride[1]))
+        out_width  = math.ceil(float(in_width) / float(stride[2]))
+
+        #3D Padding: Time Dimension
+        pad_along_height = max((out_height - 1) * stride[1] + filter_height - in_height, 0)
+        pad_along_width = max((out_width - 1) * stride[2] + filter_width - in_width, 0)
+
+        #Regular 2D Padding: Top, Bottom, Left, Right
+        pad_top = pad_along_height // 2
+        pad_bottom = pad_along_height - pad_top
+        pad_left = pad_along_width // 2
+        pad_right = pad_along_width - pad_left
     
+#Training Method with MSE Loss Function and Adam Optimizer
+def train(dataloader, model, loss_fn, optimizer):
+    output = []
+    size = len(dataloader.dataset)
+    model.train()
 
-in_channels = 1  # Assuming video frames
-model = Autoencoder(in_channels)
-
-
-epochs = 2
-outputs = []
-losses = []
-for epoch in range(epochs):
-    
-    for video in train_loader:
-
-        # print(video.dtype)
-        video = video.to(torch.float32)
+    for batch in dataloader:
+        video = batch.to(torch.float32)
         video = torch.permute(video, (0,2,1,3,4))
-        # video = tf.cast(video, tf.float32)
-        print(video.dtype)
-        print(video.size())
-
         # Output of Autoencoder
         reconstructed = model(video)
-        
-        #Display Reconstructed vs Original
 
-        fig, ax = plt.subplots()
-        ims = []
-        sm1 = video[0]
-        sample1 = sm1[0]
-        sample1 = sample1.detach().numpy()
-        sm2 = reconstructed[0]
-        sample2 = sm2[0]
-        sample2 = sample2.detach().numpy()
-        sample_list = [sample1, sample2]
-        
-        for i in range(2):
-            sample = sample_list[i]
-            for j in range(17):
-                im = ax.imshow(sample[j], animated=True)
-                if j == 0:
-                    ax.imshow(sample[j])  # show an initial one first
-                ims.append([im])
-            ani = animation.ArtistAnimation(fig, ims, interval = 20, blit = True, repeat_delay = 1000)
+        #Calculate Loss
+        loss = loss_fn(reconstructed, video)
 
-
-        plt.show()
-
+        #Backpropagate
         # The gradients are set to zero, the gradient is computed and stored.
         # .step() performs parameter update
         optimizer.zero_grad()
@@ -178,12 +190,74 @@ for epoch in range(epochs):
 
         # Storing the losses in a list for plotting
         losses.append(loss.item())
-    outputs.append((epoch, video, reconstructed))
+    return reconstructed
 
+
+        
+#Test Method to test Accuracy of Model's Predictions
+def test(dataloader, model, loss_fn):
+    size = len(dataloader.dataset)
+    num_batches = len(dataloader)
+    model.eval()
+
+    num_batches = len(dataloader)
+    tot_loss = 0
+
+    for video in dataloader:
+        video.to(device)
+
+        reconstructed = model(video)
+
+        #Returns val of tensor as int and adds to total loss
+        tot_loss += loss_fn(reconstructed, video).item()
+
+    tot_loss = tot_loss/num_batches
+    print ("Loss: " + tot_loss)
+
+def show():
+    #Display Reconstructed vs Original
+
+    fig, ax = plt.subplots()
+    ims = []
+    sm1 = video[0]
+    sample1 = sm1[0]
+    sample1 = sample1.detach().numpy()
+    sm2 = reconstructed[0]
+    sample2 = sm2[0]
+    sample2 = sample2.detach().numpy()
+    sample_list = [sample1, sample2]
+    
+    for i in range(2):
+        sample = sample_list[i]
+        for j in range(17):
+            im = ax.imshow(sample[j], animated=True)
+            if j == 0:
+                ax.imshow(sample[j])  # show an initial one first
+            ims.append([im])
+        ani = animation.ArtistAnimation(fig, ims, interval = 20, blit = True, repeat_delay = 1000)
+
+
+    plt.show()
+
+
+
+####Main Running Function 
+
+in_channels = 1  # Assuming grayscale video frames
+model = Autoencoder(in_channels)
+loss_fn = nn.MSELoss()
+optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999))
+
+epochs = 3
+losses = []
+for epoch in range(epochs):
+    print ("Epoch: " + str(epoch))
+    train(train_loader, model, loss_fn, optimizer)
+"""
 # Plotting the loss function
 plt.plot(losses)
 plt.xlabel('Iterations')
 plt.ylabel('Loss')
 plt.title('Training Loss')
 plt.show()
-
+"""
