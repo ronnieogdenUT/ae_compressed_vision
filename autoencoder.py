@@ -170,7 +170,7 @@ class Autoencoder(torch.nn.Module):
     
 #Training Method with MSE Loss Function and Adam Optimizer
 def train(dataloader, model, loss_fn, optimizer):
-    train_batches = 1 #Amount of Batches to work through per epoch
+    train_batches = 32 #Amount of Batches to work through per epoch
     output = []
     size = len(dataloader.dataset)
     model.train()
@@ -197,9 +197,8 @@ def train(dataloader, model, loss_fn, optimizer):
         # Storing the losses in a list for plotting
         losses.append(loss.item())
 
-        if (batch_num == train_batches):
+        if ((batch_num  + 1) == train_batches):
             break
-    print(reconstructed.size())
     return reconstructed
 
 
@@ -235,7 +234,7 @@ def show(batches_list):
         for frame in sample_video:
             im = ax.imshow(frame[0].cpu().detach().numpy(), animated = True)
             ims.append([im])
-        ani = animation.ArtistAnimation(fig, ims, interval = 1000, blit = True, repeat_delay = 1000)
+        ani = animation.ArtistAnimation(fig, ims, interval = 50, repeat_delay = 1000)
 
     plt.show()
 
@@ -247,7 +246,7 @@ in_channels = 1  # Assuming grayscale video frames
 model = Autoencoder(in_channels).to(device)
 loss_fn = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999))
-epochs = 3
+epochs = 32
 losses = []
 batches_list = []
 
@@ -257,7 +256,9 @@ for batch in train_loader:
 
 for epoch in range(epochs):
     print ("Epoch: " + str(epoch+1))
-    batches_list.append(train(train_loader, model, loss_fn, optimizer))
+    reconstructed = train(train_loader, model, loss_fn, optimizer)
+    reconstructed = torch.permute(reconstructed, (0,2,1,3,4))
+    batches_list.append(reconstructed)
 
 show(batches_list)
 
