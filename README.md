@@ -1,11 +1,11 @@
 # ae_compressed_vision
-Authored: Gaurav Mitra, 6/13/2024
+###Authored: Gaurav Mitra, 6/13/2024
 
 This is a general overview of the autoencoder.py file.
 
 Description: This file containers a neural network model and the capability to train it on the MNIST dataset.
 
-Imports:
+##Imports:
     torch 
         nn
         nn.functional as f
@@ -18,17 +18,17 @@ Imports:
     numpy - np
     math
 
+##Data:
+    ###Datasets: MovingMNIST
+        Description: A set of 10,000 videos with 20 frames each in grayscale of two numbers moving around a 64x64 screen.
+        Size: (10,000 x 20 x 1 x 64 x 64)
 
-Datasets: MovingMNIST
-    Description: A set of 10,000 videos with 20 frames each in grayscale of two numbers moving around a 64x64 screen.
-    Size: (10,000 x 20 x 1 x 64 x 64)
+    ###Dataloader: Trainloader
+        Size: (32 x 20 x 1 x 64 x 64)
+        Batch Size: 32
 
-Dataloader: Trainloader
-    Size: (32 x 20 x 1 x 64 x 64)
-    Batch Size: 32
-
-Classes:
-    resblock_a(torch.nn.Module)
+##Classes:
+    ###resblock_a(torch.nn.Module)
         Purpose:
             Convolves a 128 in_channel tensor to another 128 in_channel tensor. Serves as a side channel of information with original input to help decrease loss of original information.
         Input:
@@ -38,7 +38,7 @@ Classes:
         Variables:
             tensor x - 6D tensor with 128 channels
     
-    resblock_b(torch.nn.Module)
+    ###resblock_b(torch.nn.Module)
         Purpose:
             Runs resblock_a 3 times
         Input:
@@ -48,7 +48,7 @@ Classes:
         Variables:
             tensor x - 6D tensor with 128 channels
 
-    resblock_c(torch.nn.Module)
+    ###resblock_c(torch.nn.Module)
         Purpose:
             Runs resblock_b 6 times
         Input:
@@ -58,7 +58,7 @@ Classes:
         Variables:
             tensor x - 6D tensor with 128 channels
 
-    Autoencoder(torch.nn.Module)
+    ###Autoencoder(torch.nn.Module)
         Purpose:
             Autoencoder Model that contains encoder + decoder. Transforms a (20,1,64,64) into (20,128,8,8) and deconvolves back to (20,1,64,64)
         Input:
@@ -68,8 +68,8 @@ Classes:
         Variables:
             tensor x - 6D tensor with 128 channels
 
-Functions:
-    def same_pad(self, x, stride, kernel)
+##Functions:
+    ###def same_pad(self, x, stride, kernel)
         Purpose:
             Function that mimics TensorFlow's "padding = 'same'" parameter of convolutions.
         Input:
@@ -97,7 +97,7 @@ Functions:
             int pad_left - padding for left side(pad_along_width/2)
             tuple output - size 6 tuple of paddings for all sides
 
-    def train(dataloader, model, loss_fn, optimizer)
+    ###def train(dataloader, model, loss_fn, optimizer)
         Purpose:
             Trains Model using Adam optimizer and calculating MSE loss
         Input:
@@ -116,7 +116,7 @@ Functions:
             int loss - loss from MSE loss calculation
 
     
-    def test(dataloader, model, loss_fn)
+    ###def test(dataloader, model, loss_fn)
         Purpose:
             Function that tests model accuracy and caluclates total loss per batch
         Input:
@@ -129,7 +129,7 @@ Functions:
             int num_batches - number of batches
             int tot_loss - total amount of loss per epoch
     
-    def show(batches_list)
+    ###def show(batches_list)
         Purpose:
             Displays first video in each batch in batches_list
         Input:
@@ -144,7 +144,7 @@ Functions:
             tensor im - frame tensor in sample_video
             AristAnimation ani - video of the different videos per epoch
 
-    def main()
+    ###def main()
         Purpose:
             Currently trains model for set number of epochs and calls show() to display first video in first batch
         Input:
