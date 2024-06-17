@@ -46,7 +46,6 @@ test_loader = torch.utils.data.DataLoader(
 )
 
 #Check CUDA Availability
-"""
 device = (
     "cuda"
     if torch.cuda.is_available()
@@ -54,8 +53,6 @@ device = (
     if torch.backends.mps.is_available()
     else "cpu"
 )
-"""
-device = "cpu"
 print(f"Using {device} device")
 
 class resblock_a(torch.nn.Module):
