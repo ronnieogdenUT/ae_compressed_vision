@@ -177,7 +177,7 @@ class Autoencoder(torch.nn.Module):
 def train(dataloader, model, loss_fn, optimizer):
     #Initialize Vars
     train_batches = 32 #Amount of Batches to work through per epoch
-    losses = []
+    tot_loss = 0
 
     #Setting Model Setting to Train
     model.train()
@@ -185,7 +185,7 @@ def train(dataloader, model, loss_fn, optimizer):
     #Iterating Through Dataloader
     for (batch_num, batch) in enumerate(dataloader):
         batch = batch.to(device)
-        print ("Batch: " + str(batch_num+1))
+        #print ("Batch: " + str(batch_num+1))
 
         #Convert Int8 Tensor to NP-usable Float32
         batch = batch.to(torch.float32)
@@ -198,6 +198,7 @@ def train(dataloader, model, loss_fn, optimizer):
 
         #Calculate Loss
         loss = loss_fn(reconstructed, batch)
+        tot_loss = tot_loss + loss
 
         #Backpropagate
         # The gradients are set to zero, the gradient is computed and stored.
@@ -206,13 +207,13 @@ def train(dataloader, model, loss_fn, optimizer):
         loss.backward()
         optimizer.step()
 
-        # Storing the losses in a list for plotting
-        losses.append(loss.item())
+        #print (f"Loss: {loss}")
 
         #Setting Number of Batches per Epoch
         if ((batch_num  + 1) == train_batches):
+            return reconstructed, tot_loss
             break
-    return reconstructed
+    return tot_loss
 
 
 #Test Method to test Accuracy of Model's Predictions
@@ -264,39 +265,96 @@ def show(batches_list):
 
 #Main Function 
 def main():
+    model_exist = False
+    is_train = True
+    if (is_train):
+        in_channels = 1  # Assuming grayscale video frames
+        epochs = 32
+        losses = []
+        batches_list = []
 
-    in_channels = 1  # Assuming grayscale video frames
-    epochs = 32
-    losses = []
-    batches_list = []
+        model = Autoencoder(in_channels).to(device) #Intialize Model
+        if (model_exist):
+            model.load_state_dict(torch.load("model.pth"))
+        
+        loss_fn = nn.MSELoss() #Intialize Loss Function
+        optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer
 
-    model = Autoencoder(in_channels).to(device) #Intialize Model
-    loss_fn = nn.MSELoss() #Intialize Loss Function
-    optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer
+        #Uses Trainloader to Run Videos through model and appends first batch of every epoch to batches_list
+        for epoch in range(epochs):
+            print ("Epoch: " + str(epoch+1), end = "")
+            
+            if epoch < (epochs-1):
+                epoch_loss = train(train_loader, model, loss_fn, optimizer)
+                print ("  |   Loss = " + epoch_loss)
+            else:
+                reconstructed, epoch_loss = train(train_loader, model, loss_fn, optimizer)
+                print ("  |   Loss = " + epoch_loss)
+                reconstructed = torch.permute(reconstructed, (0,2,1,3,4))
+                batches_list.append(reconstructed)
+            losses.append(epoch_loss)
 
-    #Take First Batch from Original Video, append to batches_list
-    for batch in train_loader:
-        batches_list.append(batch)
-        break
 
-    #Uses Trainloader to Run Videos through model and appends first batch of every epoch to batches_list
-    for epoch in range(epochs):
-        print ("Epoch: " + str(epoch+1))
-        reconstructed = train(train_loader, model, loss_fn, optimizer)
-        reconstructed = torch.permute(reconstructed, (0,2,1,3,4))
-        batches_list.append(reconstructed)
+        torch.save(model.state_dict(), "model.pth")
+        print("Saved Model")
 
-    #Calls show function
-    show(batches_list)
+        #Calls show function
+        show(batches_list)
 
-    """
-    # Plotting the loss function
-    plt.plot(losses)
-    plt.xlabel('Iterations')
-    plt.ylabel('Loss')
-    plt.title('Training Loss')
-    plt.show()
-    """
+        # Plotting the loss function
+        plt.plot(losses)
+        plt.xlabel('Iterations')
+        plt.ylabel('Loss')
+        plt.title('Training Loss')
+        plt.show()
+
+    #Test Function
+    else:
+        in_channels = 1  # Assuming grayscale video frames
+        epochs = 32
+        losses = []
+        batches_list = []
+
+        model = Autoencoder(in_channels).to(device) #Intialize Model
+        if (model_exist):
+            model.load_state_dict(torch.load("model.pth"))
+        
+        loss_fn = nn.MSELoss() #Intialize Loss Function
+        optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer
+
+        #Take First Batch from Original Video, append to batches_list
+        for batch in train_loader:
+            batches_list.append(batch)
+            break
+
+        #Uses Trainloader to Run Videos through model and appends first batch of every epoch to batches_list
+        for epoch in range(epochs):
+            print ("Epoch: " + str(epoch+1), end = "")
+            
+            if epoch < (epochs-1):
+                epoch_loss = test(train_loader, model, loss_fn)
+                print ("  |   Loss = " + epoch_loss)
+            else:
+                reconstructed, epoch_loss = train(train_loader, model, loss_fn)
+                print ("  |   Loss = " + epoch_loss)
+                reconstructed = torch.permute(reconstructed, (0,2,1,3,4))
+                batches_list.append(reconstructed)
+            losses.append(epoch_loss)
+
+
+        torch.save(model.state_dict(), "model.pth")
+        print("Saved Model")
+
+        #Calls show function
+        show(batches_list)
+
+        # Plotting the loss function
+        plt.plot(losses)
+        plt.xlabel('Iterations')
+        plt.ylabel('Loss')
+        plt.title('Training Loss')
+        plt.show()
+        
 
 #Call Main Function
 main()
