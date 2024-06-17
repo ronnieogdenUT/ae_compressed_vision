@@ -7,30 +7,46 @@ import numpy as np
 import torch.nn as nn
 import matplotlib.animation as animation
 import math
+from torch.utils.data.sampler import SubsetRandomSampler
 
-#Import MovingMNIST Training Dataset
-train_data = datasets.MovingMNIST(
+#Import MovingMNIST Dataset
+data = datasets.MovingMNIST(
     root = "./data", 
     download = True
 )
 
-#Import MovingMNIST Test Dataset
-# test_data = datasets.MovingMNIST(
-#     root = "./data", 
-#     split = "test", 
-#     download = True
-# )
+#Split into Training and Test Datasets
+test_split = 0.2
+dataset_size = len(data)
+indices = list(range(dataset_size))
+split = int(np.floor(test_split * dataset_size))
 
+#Shuffle Dataset
+np.random.seed()
+np.random.shuffle(indices)
+
+train_indices, test_indices = indices[split:], indices[:split]
+
+train_sampler = SubsetRandomSampler(train_indices)
+test_sampler = SubsetRandomSampler(test_indices)
 
 #Initialize Dataloader over training data
 batch_size = 32
 train_loader = torch.utils.data.DataLoader(
-    dataset = train_data,
+    dataset = data,
     batch_size = batch_size, 
-    shuffle = True
+    sampler = train_sampler
+)
+
+#Initialize Dataloader over test data
+test_loader = torch.utils.data.DataLoader(
+    dataset = data,
+    batch_size = batch_size,
+    sampler = test_sampler
 )
 
 #Check CUDA Availability
+"""
 device = (
     "cuda"
     if torch.cuda.is_available()
@@ -38,6 +54,8 @@ device = (
     if torch.backends.mps.is_available()
     else "cpu"
 )
+"""
+device = "cpu"
 print(f"Using {device} device")
 
 class resblock_a(torch.nn.Module):
@@ -198,7 +216,8 @@ def train(dataloader, model, loss_fn, optimizer):
 
         #Calculate Loss
         loss = loss_fn(reconstructed, batch)
-        tot_loss = tot_loss + loss
+        int_loss = loss.item()
+        tot_loss = tot_loss + int_loss
 
         #Backpropagate
         # The gradients are set to zero, the gradient is computed and stored.
@@ -211,53 +230,78 @@ def train(dataloader, model, loss_fn, optimizer):
 
         #Setting Number of Batches per Epoch
         if ((batch_num  + 1) == train_batches):
-            return reconstructed, tot_loss
+            return tot_loss
             break
-    return tot_loss
 
 
 #Test Method to test Accuracy of Model's Predictions
 def test(dataloader, model, loss_fn):
-    num_batches = len(dataloader)
+    num_testBatches = 20 #How Many Batches to Run Through, Max = 2,000
     model.eval()
-
-    num_batches = len(dataloader)
+    num_videos_show = 10 #How many Videos to Show at End
+    num_every_video = num_testBatches/num_videos_show #Take a batch per # batches
+    original_batches = []
+    reconstructed_batches = []
     tot_loss = 0
 
-    for video in dataloader:
-        video.to(device)
+    for (batch_num, batch) in enumerate(dataloader):
+        print ("Batch: " + str(batch_num))
+        batch = batch.to(device)
 
-        reconstructed = model(video)
+        #Convert Int8 Tensor to NP-usable Float32
+        batch = batch.to(torch.float32)
 
-        #Returns val of tensor as int and adds to total loss
-        tot_loss += loss_fn(reconstructed, video).item()
+        #Shift Tensor from size (32,20,1,64,64) to size(32,1,20,64,64)
+        batch = torch.permute(batch, (0,2,1,3,4))
 
-    tot_loss = tot_loss/num_batches
-    print ("Loss: " + tot_loss)
+        # Output of Autoencoder
+        reconstructed = model(batch)
+
+        #Calculate Loss
+        loss = loss_fn(reconstructed, batch).item()
+        tot_loss = tot_loss + loss
+
+        #Every "num_videos_show" batches append first vid: originial and reconstructed
+        if (batch_num % num_every_video == 0):
+            original_batches.append(torch.permute(batch, (0,2,1,3,4)))
+            reconstructed_batches.append(torch.permute(reconstructed, (0,2,1,3,4)))
+
+
+        #Setting Number of Batches to Test
+        if ((batch_num  + 1) == num_testBatches):
+            break
+    avg_loss = tot_loss/num_testBatches
+    return original_batches, reconstructed_batches, avg_loss
 
 
 #Display Reconstructed vs Original
-def show(batches_list):
-
+def show(original_batchList, reconstructed_batchList):
     #Define Plot + Axes + Initial Frame List
-    fig, ax = plt.subplots()
+    fig = plt.figure()
+    ax1 = fig.add_subplot(1,2,1)
+    ax2 = fig.add_subplot(1,2,2)
     ims = []
 
     #Iterates through Batches, , and then through frames in video
-    for batch in batches_list:
+    for batch in range(len(original_batchList)):
 
-        #take first video in batch
-        sample_video = batch[0]
+        #Get Batches
+        original_batch = original_batchList[batch]
+        reconstructed_batch = reconstructed_batchList[batch]
+        #Take first video from batches
+        original_sample_video = original_batch[0]
+        reconstructed_sample_video = reconstructed_batch[0]
 
-        for frame in sample_video:
+        for original_frame, reconstructed_frame in zip(original_sample_video, reconstructed_sample_video):
             #convert frame tensor to image(frame[0] because size is (1,64,64))
-            im = ax.imshow(frame[0].cpu().detach().numpy(), animated = True)
+            im1 = ax1.imshow(original_frame[0].cpu().detach().numpy(), animated = True)
+            im2 = ax2.imshow(reconstructed_frame[0].cpu().detach().numpy(), animated = True)
 
             #append frame to frame list
-            ims.append([im])
+            ims.append([im1, im2])
 
-        #create video from frame list
-        ani = animation.ArtistAnimation(fig, ims, interval = 50, repeat_delay = 1000)
+    #create video from frame list
+    ani = animation.ArtistAnimation(fig, ims, interval = 50, repeat_delay = 1000)
 
     #display video
     plt.show()
@@ -265,8 +309,8 @@ def show(batches_list):
 
 #Main Function 
 def main():
-    model_exist = False
-    is_train = True
+    model_exist = True
+    is_train = False
     if (is_train):
         in_channels = 1  # Assuming grayscale video frames
         epochs = 32
@@ -283,23 +327,13 @@ def main():
         #Uses Trainloader to Run Videos through model and appends first batch of every epoch to batches_list
         for epoch in range(epochs):
             print ("Epoch: " + str(epoch+1), end = "")
-            
-            if epoch < (epochs-1):
-                epoch_loss = train(train_loader, model, loss_fn, optimizer)
-                print ("  |   Loss = " + epoch_loss)
-            else:
-                reconstructed, epoch_loss = train(train_loader, model, loss_fn, optimizer)
-                print ("  |   Loss = " + epoch_loss)
-                reconstructed = torch.permute(reconstructed, (0,2,1,3,4))
-                batches_list.append(reconstructed)
+            epoch_loss = train(train_loader, model, loss_fn, optimizer)
+            print ("  |   Loss = " + str(epoch_loss))
             losses.append(epoch_loss)
 
 
         torch.save(model.state_dict(), "model.pth")
         print("Saved Model")
-
-        #Calls show function
-        show(batches_list)
 
         # Plotting the loss function
         plt.plot(losses)
@@ -311,49 +345,23 @@ def main():
     #Test Function
     else:
         in_channels = 1  # Assuming grayscale video frames
-        epochs = 32
         losses = []
         batches_list = []
 
         model = Autoencoder(in_channels).to(device) #Intialize Model
-        if (model_exist):
-            model.load_state_dict(torch.load("model.pth"))
+
+        model.load_state_dict(torch.load("model.pth"))
         
         loss_fn = nn.MSELoss() #Intialize Loss Function
-        optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer
 
-        #Take First Batch from Original Video, append to batches_list
-        for batch in train_loader:
-            batches_list.append(batch)
-            break
+        #Uses TestLoader to Run Videos through model
+        original_list, reconstructed_list, avg_loss = test(test_loader, model, loss_fn)
 
-        #Uses Trainloader to Run Videos through model and appends first batch of every epoch to batches_list
-        for epoch in range(epochs):
-            print ("Epoch: " + str(epoch+1), end = "")
-            
-            if epoch < (epochs-1):
-                epoch_loss = test(train_loader, model, loss_fn)
-                print ("  |   Loss = " + epoch_loss)
-            else:
-                reconstructed, epoch_loss = train(train_loader, model, loss_fn)
-                print ("  |   Loss = " + epoch_loss)
-                reconstructed = torch.permute(reconstructed, (0,2,1,3,4))
-                batches_list.append(reconstructed)
-            losses.append(epoch_loss)
-
-
-        torch.save(model.state_dict(), "model.pth")
-        print("Saved Model")
+        print("Average Loss per Batch: " + str(avg_loss))
 
         #Calls show function
-        show(batches_list)
+        show(original_list, reconstructed_list)
 
-        # Plotting the loss function
-        plt.plot(losses)
-        plt.xlabel('Iterations')
-        plt.ylabel('Loss')
-        plt.title('Training Loss')
-        plt.show()
         
 
 #Call Main Function
