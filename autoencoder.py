@@ -7,6 +7,7 @@ import numpy as np
 import torch.nn as nn
 import matplotlib.animation as animation
 import math
+from pytorch_msssim import ms_ssim
 from torch.utils.data.sampler import SubsetRandomSampler
 
 #Import MovingMNIST Dataset
@@ -188,48 +189,42 @@ class Autoencoder(torch.nn.Module):
         return output
     
 
-#Training Method with MSE Loss Function and Adam Optimizer
+#Training Method with MS-SSIM Loss Function and Adam Optimizer
 def train(dataloader, model, loss_fn, optimizer):
-    #Initialize Vars
-    train_batches = 32 #Amount of Batches to work through per epoch
+    # Initialize Vars
+    train_batches = 32  # Amount of Batches to work through per epoch
     tot_loss = 0
 
-    #Setting Model Setting to Train
+    # Setting Model to Train
     model.train()
 
-    #Iterating Through Dataloader
+    # Iterating Through Dataloader
     for (batch_num, batch) in enumerate(dataloader):
         batch = batch.to(device)
-        #print ("Batch: " + str(batch_num+1))
-
-        #Convert Int8 Tensor to NP-usable Float32
+        
+        # Convert Int8 Tensor to NP-usable Float32
         batch = batch.to(torch.float32)
 
-        #Shift Tensor from size (32,20,1,64,64) to size(32,1,20,64,64)
+        # Shift Tensor from size (32,20,1,64,64) to size(32,1,20,64,64)
         batch = torch.permute(batch, (0,2,1,3,4))
 
         # Output of Autoencoder
         reconstructed = model(batch)
 
-        #Calculate Loss
-        loss = loss_fn(reconstructed, batch)
+        # Calculate Loss
+        loss = 1 - ms_ssim(reconstructed, batch, data_range=1.0, size_average=True)
         int_loss = loss.item()
         tot_loss = tot_loss + int_loss
 
-        #Backpropagate
-        # The gradients are set to zero, the gradient is computed and stored.
-        # .step() performs parameter update
+        # Backpropagate
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
-        #print (f"Loss: {loss}")
-
-        #Setting Number of Batches per Epoch
-        if ((batch_num  + 1) == train_batches):
+        # Setting Number of Batches per Epoch
+        if (batch_num + 1) == train_batches:
             return tot_loss
             break
-
 
 #Test Method to test Accuracy of Model's Predictions
 def test(dataloader, model, loss_fn):
@@ -254,8 +249,8 @@ def test(dataloader, model, loss_fn):
         # Output of Autoencoder
         reconstructed = model(batch)
 
-        #Calculate Loss
-        loss = loss_fn(reconstructed, batch).item()
+        # Calculate Loss
+        loss = 1 - ms_ssim(reconstructed, batch, data_range=1.0, size_average=True).item()
         tot_loss = tot_loss + loss
 
         #Every "num_videos_show" batches append first vid: originial and reconstructed
@@ -316,9 +311,9 @@ def main():
 
         model = Autoencoder(in_channels).to(device) #Intialize Model
         if (model_exist):
-            model.load_state_dict(torch.load("model.pth"))
+            model.load_state_dict(torch.load("model.pth", map_location=torch.device(device)))
         
-        loss_fn = nn.MSELoss() #Intialize Loss Function
+        loss_fn = ms_ssim #Intialize Loss Function
         optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer
 
         #Uses Trainloader to Run Videos through model and appends first batch of every epoch to batches_list
@@ -346,10 +341,10 @@ def main():
         batches_list = []
 
         model = Autoencoder(in_channels).to(device) #Intialize Model
-
-        model.load_state_dict(torch.load("model.pth"))
         
-        loss_fn = nn.MSELoss() #Intialize Loss Function
+        model.load_state_dict(torch.load("model.pth", map_location=torch.device(device)))
+        
+        loss_fn = ms_ssim #Intialize Loss Function
 
         #Uses TestLoader to Run Videos through model
         original_list, reconstructed_list, avg_loss = test(test_loader, model, loss_fn)
