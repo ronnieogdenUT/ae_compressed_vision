@@ -7,6 +7,7 @@ import numpy as np
 import torch.nn as nn
 import matplotlib.animation as animation
 import math
+from pytorch_msssim import ms_ssim
 from torch.utils.data.sampler import SubsetRandomSampler
 
 #Import MovingMNIST Dataset
@@ -305,9 +306,7 @@ def show(original_batchList, reconstructed_batchList):
 
 
 #Main Function 
-def main():
-    model_exist = True
-    is_train = False
+def main(is_train, model_name):
     if (is_train):
         in_channels = 1  # Assuming grayscale video frames
         epochs = 32
@@ -315,8 +314,8 @@ def main():
         batches_list = []
 
         model = Autoencoder(in_channels).to(device) #Intialize Model
-        if (model_exist):
-            model.load_state_dict(torch.load("model.pth"))
+        if (model_exist == True):
+            model.load_state_dict(torch.load(model_name))
         
         loss_fn = nn.MSELoss() #Intialize Loss Function
         optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer
@@ -329,7 +328,7 @@ def main():
             losses.append(epoch_loss)
 
 
-        torch.save(model.state_dict(), "model.pth")
+        torch.save(model.state_dict(), model_name)
         print("Saved Model")
 
         # Plotting the loss function
@@ -347,7 +346,7 @@ def main():
 
         model = Autoencoder(in_channels).to(device) #Intialize Model
 
-        model.load_state_dict(torch.load("model.pth"))
+        model.load_state_dict(torch.load(model_name))
         
         loss_fn = nn.MSELoss() #Intialize Loss Function
 
@@ -362,4 +361,7 @@ def main():
         
 
 #Call Main Function
-main()
+model_name = "model.pth"
+model_exist = True
+is_train = False
+main(is_train, model_name)
