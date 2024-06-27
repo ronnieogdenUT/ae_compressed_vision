@@ -355,7 +355,11 @@ def main(is_train, model_name):
         
 
 #Call Main Function
+<<<<<<< HEAD
 model_name = "model.pth"
 model_exist = True
 is_train = False
 main(is_train, model_name)
+=======
+main()
+>>>>>>> main
