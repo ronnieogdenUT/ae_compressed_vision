@@ -311,7 +311,7 @@ def main(is_train, model_name):
         if (model_exist == True):
             model.load_state_dict(torch.load(model_name))
         
-        loss_fn = ms_ssim #Intialize Loss Function
+        loss_fn = nn.MSELoss() #Intialize Loss Function
         optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer
 
         #Uses Trainloader to Run Videos through model and appends first batch of every epoch to batches_list
@@ -342,7 +342,7 @@ def main(is_train, model_name):
 
         model.load_state_dict(torch.load(model_name))
         
-        loss_fn = ms_ssim #Intialize Loss Function
+        loss_fn = nn.MSELoss() #Intialize Loss Function
 
         #Uses TestLoader to Run Videos through model
         original_list, reconstructed_list, avg_loss = test(test_loader, model, loss_fn)
