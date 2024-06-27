@@ -212,7 +212,7 @@ def train(dataloader, model, loss_fn, optimizer):
         reconstructed = model(batch)
 
         # Calculate Loss
-        loss = 1 - ms_ssim(reconstructed, batch, data_range=1.0, size_average=True)
+        loss = 1 - loss_fn(reconstructed, batch)
         int_loss = loss.item()
         tot_loss = tot_loss + int_loss
 
@@ -355,11 +355,7 @@ def main(is_train, model_name):
         
 
 #Call Main Function
-<<<<<<< HEAD
 model_name = "model.pth"
 model_exist = True
 is_train = False
 main(is_train, model_name)
-=======
-main()
->>>>>>> main
