@@ -152,7 +152,7 @@ class Autoencoder(torch.nn.Module):
         x = self.encoderConv2(x)
         x = self.encoderBn2(x)
         x = f.relu(x)
-        x = self.resblock_c(x)
+        x = self.resblock(x)
 
         x = f.pad(x, self.same_pad(x, stride, 5))
         x = self.encoderConv3(x)
