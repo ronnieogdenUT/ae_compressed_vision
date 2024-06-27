@@ -120,6 +120,7 @@ class Autoencoder(torch.nn.Module):
     def __init__(self, in_channels):
         super().__init__()
 
+        self.resblock_c = resblock_c()
         # Encoder
         self.encoderConv1 = torch.nn.Conv3d(in_channels, 64, 5, stride=(1,2,2))
         self.encoderBn1 = torch.nn.BatchNorm3d(64)
@@ -128,7 +129,6 @@ class Autoencoder(torch.nn.Module):
         self.encoderConv3 = torch.nn.Conv3d(128, 32, 5, stride=(1,2,2))
         self.encoderBn3 = torch.nn.BatchNorm3d(32)
         
-        self.resblock = resblock_c()
         self.soft_quant = SoftQuantization()
 
         # Decoder
@@ -152,7 +152,7 @@ class Autoencoder(torch.nn.Module):
         x = self.encoderConv2(x)
         x = self.encoderBn2(x)
         x = f.relu(x)
-        x = self.resblock(x)
+        x = self.resblock_c(x)
 
         x = f.pad(x, self.same_pad(x, stride, 5))
         x = self.encoderConv3(x)
@@ -366,6 +366,6 @@ def main():
 # Call Main Function
 main()        
 model_name = "model.pth"
-model_exist = True
+model_exist = False
 is_train = True
 main(is_train, model_name)
