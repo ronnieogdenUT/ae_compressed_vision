@@ -366,6 +366,6 @@ def main():
 # Call Main Function
 main()        
 model_name = "model.pth"
-model_exist = False
+model_exist = True
 is_train = True
 main(is_train, model_name)
