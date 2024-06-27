@@ -250,7 +250,7 @@ def test(dataloader, model, loss_fn):
         reconstructed = model(batch)
 
         # Calculate Loss
-        loss = 1 - ms_ssim(reconstructed, batch, data_range=1.0, size_average=True).item()
+        loss = 1 - loss_fn(reconstructed, batch).item()
         tot_loss = tot_loss + loss
 
         #Every "num_videos_show" batches append first vid: originial and reconstructed
