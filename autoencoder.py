@@ -10,7 +10,7 @@ import math
 from pytorch_msssim import ms_ssim
 from torch.utils.data.sampler import SubsetRandomSampler
 
-import quantizer
+
 
 #Import MovingMNIST Dataset
 data = datasets.MovingMNIST(
@@ -109,8 +109,13 @@ class resblock_c(torch.nn.Module):
         return out
 
 class Autoencoder(torch.nn.Module):
-    def __init__(self, in_channels):
+    def __init__(self, in_channels, codebook_length):
         super().__init__()
+        self.tau = 10
+        #z output from encoder as B x D x Channels x L x W
+        #Initialize centroids to 32x32x20x8x8xL
+        self.centroids = nn.Parameter(torch.ones([codebook_length, 32,32,20,8,8], dtype = torch.float32).to("cpu"))
+        self.codebook_length = codebook_length
 
         #Encoder
         self.encoderConv1 = torch.nn.Conv3d(in_channels, 64, 5, stride=(1,2,2))
@@ -118,7 +123,9 @@ class Autoencoder(torch.nn.Module):
         self.encoderConv2 = torch.nn.Conv3d(64, 128, 5, stride=(1,2,2))
         self.encoderBn2 = torch.nn.BatchNorm3d(128)
         self.encoderConv3 = torch.nn.Conv3d(128, 32, 5, stride=(1,2,2))
-        self.encoderBn3 = torch.nn.BatchNorm3d(32)   
+        self.encoderBn3 = torch.nn.BatchNorm3d(32)  
+
+        #self.resblock_c = resblock_c()
         
         # Figure out if resblock_c needs to be a transposed version... I think they are the same here		
         #Decoder
@@ -142,17 +149,20 @@ class Autoencoder(torch.nn.Module):
         x = self.encoderConv2(x)
         x = self.encoderBn2(x)
         x = f.relu(x)
-        x = resblock_c(x)
+        #x = resblock_c(x)
 
         x = f.pad(x, self.same_pad(x, stride, 5))
         x = self.encoderConv3(x)
         x = self.encoderBn3(x)
 
+        #Quantize
+        quantized_x = self.quantize(x).to(device)
+
         #Decoder
-        x = self.decoderConv1(x)
+        x = self.decoderConv1(quantized_x)
         x = self.decoderBn1(x)
         x = f.relu(x)
-        x = resblock_c(x)
+        #x = resblock_c(x)
 
         x = self.decoderConv2(x)
         x = self.decoderBn2(x)
@@ -190,6 +200,58 @@ class Autoencoder(torch.nn.Module):
         output = (pad_left, pad_right, pad_top, pad_bottom, pad_forward, pad_backward)
         return output
     
+    def quantize(self, x):
+        #Compute Distances
+        numpy_centroids = self.centroids.cpu().detach().numpy()
+        numpy_x = x.cpu().detach().numpy()
+        #Get closest centroid
+        #Qd = torch.argmin(distances, dim=1)
+
+        total_sum = np.ones(numpy_centroids.shape)
+
+
+        #Calculate Total Distances
+        for i in range(self.codebook_length):
+            distance = (abs(numpy_x - numpy_centroids[i, :]))
+            total_sum[i] = np.exp(-self.tau*distance)
+        
+        #Sums up to create denominator of size (32x32x20x8x8)
+        total_sum = np.sum(total_sum)
+
+        #print(total_sum)
+
+        #Calculate Qs, size(code_length x 32 x 32 x 20 x 8 x 8)
+        #print("Centroids: " + str(numpy_centroids.shape))
+        Qs = np.ones(numpy_centroids.shape)
+        for i in range(self.codebook_length):
+            distance = (abs(numpy_x - numpy_centroids[i, :]))
+            Qs[i] = np.exp(-self.tau*distance)*numpy_centroids[i]/total_sum
+
+        #Convert Qs back to Tensor, run softmax to get likely closest Codebook Value at 1
+        Qs = torch.from_numpy(Qs)
+
+        #Multiply Qs with centroids to get closest Codebook Value
+        #Multiplies Qs(L x 32 x 32 x 20 x 8 x 8) and centroids(L x 32 x 32 x 20 x 8 x 8) and converts to tensor
+
+        quantized_x = Qs.cpu() * self.centroids.cpu()
+
+        # print(quantized_x.shape)
+        # print(quantized_x[:, 1, 1, 1, 1, 1])
+
+        #Now we have the L x 32 x 32 x 20 x 8 x 8, which should entirely be one codebook value with 
+        quantized_x = torch.sum(Qs * numpy_centroids, dim = 0)
+
+        #Reduced down to the one codebook value
+
+        self.centroids.to(device)
+
+
+
+        #Full Quant(Not implemented)
+        #z_bar = (Qd - Qs).detach() + Qs
+
+        return quantized_x.type(torch.FloatTensor)
+    
 
 #Training Method with MSE Loss Function and Adam Optimizer
 def train(dataloader, model, loss_fn, optimizer):
@@ -202,6 +264,7 @@ def train(dataloader, model, loss_fn, optimizer):
 
     #Iterating Through Dataloader
     for (batch_num, batch) in enumerate(dataloader):
+        #print ("Batch: " + str(batch_num+1))
         batch = batch.to(device)
         #print ("Batch: " + str(batch_num+1))
 
@@ -217,6 +280,7 @@ def train(dataloader, model, loss_fn, optimizer):
         #Calculate Loss
         loss = loss_fn(reconstructed, batch)
         int_loss = loss.item()
+        #print("Batch Loss: " + str(int_loss))
         tot_loss = tot_loss + int_loss
 
         #Backpropagate
@@ -308,19 +372,20 @@ def show(original_batchList, reconstructed_batchList):
 
 
 #Main Function 
-def main(is_train, model_name):
+def main(is_train, model_name, codebook_length):
     if (is_train):
         in_channels = 1  # Assuming grayscale video frames
-        epochs = 32
+        epochs = 10
         losses = []
         batches_list = []
 
-        model = Autoencoder(in_channels).to(device) #Intialize Model
+        model = Autoencoder(in_channels, codebook_length).to(device) #Intialize Model
         if (model_exist == True):
             model.load_state_dict(torch.load(model_name))
+
         
         loss_fn = nn.MSELoss() #Intialize Loss Function
-        optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer
+        optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer for model weights
 
         #Uses Trainloader to Run Videos through model and appends first batch of every epoch to batches_list
         for epoch in range(epochs):
@@ -346,7 +411,7 @@ def main(is_train, model_name):
         losses = []
         batches_list = []
 
-        model = Autoencoder(in_channels).to(device) #Intialize Model
+        model = Autoencoder(in_channels, codebook_length).to(device) #Intialize Model
 
         model.load_state_dict(torch.load(model_name))
         
@@ -363,7 +428,8 @@ def main(is_train, model_name):
         
 
 #Call Main Function
-model_name = "model.pth"
+model_name = "modelQuant.pth"
 model_exist = True
 is_train = False
-main(is_train, model_name)
+codebook_length = 20
+main(is_train, model_name, codebook_length)
