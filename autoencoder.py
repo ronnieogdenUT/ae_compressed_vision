@@ -115,6 +115,7 @@ class Autoencoder(torch.nn.Module):
         #z output from encoder as B x D x Channels x L x W
         #Initialize centroids to 32x32x20x8x8xL
         self.centroids = nn.Parameter(torch.ones([codebook_length, 32,32,20,8,8], dtype = torch.float32).to("cpu"))
+        torch.nn.init.kaiming_uniform_(self.centroids, mode="fan_in", nonlinearity="relu")
         self.codebook_length = codebook_length
 
         #Encoder
@@ -202,61 +203,45 @@ class Autoencoder(torch.nn.Module):
     
     def quantize(self, x):
         #Compute Distances
-        numpy_centroids = self.centroids.cpu().detach().numpy()
-        numpy_x = x.cpu().detach().numpy()
+        centroids = self.centroids
         #Get closest centroid
         #Qd = torch.argmin(distances, dim=1)
 
-        total_sum = np.ones(numpy_centroids.shape)
-
-
-        #Calculate Total Distances
-        for i in range(self.codebook_length):
-            distance = (abs(numpy_x - numpy_centroids[i, :]))
-            total_sum[i] = np.exp(-self.tau*distance)
-        
-        #Sums up to create denominator of size (32x32x20x8x8)
-        total_sum = np.sum(total_sum)
+        total_sum = torch.ones(centroids.shape)
 
         #print(total_sum)
 
         #Calculate Qs, size(code_length x 32 x 32 x 20 x 8 x 8)
         #print("Centroids: " + str(numpy_centroids.shape))
-        Qs = np.ones(numpy_centroids.shape)
+        Qs = torch.ones(centroids.shape).to(device)
         for i in range(self.codebook_length):
-            distance = (abs(numpy_x - numpy_centroids[i, :]))
-            Qs[i] = np.exp(-self.tau*distance)*numpy_centroids[i]/total_sum
+            distance = (abs(x - centroids[i, :]))
+            Qs[i] = torch.exp(-self.tau*distance)
 
-        #Convert Qs back to Tensor, run softmax to get likely closest Codebook Value at 1
-        Qs = torch.from_numpy(Qs)
+        quantized_x = (Qs * centroids)/torch.sum(Qs)
 
         #Multiply Qs with centroids to get closest Codebook Value
         #Multiplies Qs(L x 32 x 32 x 20 x 8 x 8) and centroids(L x 32 x 32 x 20 x 8 x 8) and converts to tensor
-
-        quantized_x = Qs.cpu() * self.centroids.cpu()
 
         # print(quantized_x.shape)
         # print(quantized_x[:, 1, 1, 1, 1, 1])
 
         #Now we have the L x 32 x 32 x 20 x 8 x 8, which should entirely be one codebook value with 
-        quantized_x = torch.sum(Qs * numpy_centroids, dim = 0)
+        quantized_x = torch.sum(quantized_x, dim=0)
 
         #Reduced down to the one codebook value
-
-        self.centroids.to(device)
-
-
+        print(quantized_x)
 
         #Full Quant(Not implemented)
         #z_bar = (Qd - Qs).detach() + Qs
 
-        return quantized_x.type(torch.FloatTensor)
+        return quantized_x
     
 
 #Training Method with MSE Loss Function and Adam Optimizer
 def train(dataloader, model, loss_fn, optimizer):
     #Initialize Vars
-    train_batches = 32 #Amount of Batches to work through per epoch
+    train_batches = 1 #Amount of Batches to work through per epoch
     tot_loss = 0
 
     #Setting Model Setting to Train
@@ -375,7 +360,7 @@ def show(original_batchList, reconstructed_batchList):
 def main(is_train, model_name, codebook_length):
     if (is_train):
         in_channels = 1  # Assuming grayscale video frames
-        epochs = 10
+        epochs = 1
         losses = []
         batches_list = []
 
@@ -429,7 +414,7 @@ def main(is_train, model_name, codebook_length):
 
 #Call Main Function
 model_name = "modelQuant.pth"
-model_exist = True
-is_train = False
+model_exist = False
+is_train = True
 codebook_length = 20
 main(is_train, model_name, codebook_length)
