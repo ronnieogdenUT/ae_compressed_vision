@@ -230,7 +230,7 @@ class Autoencoder(torch.nn.Module):
         quantized_x = torch.sum(quantized_x, dim=0)
 
         #Reduced down to the one codebook value
-        print(quantized_x)
+        #print(quantized_x)
 
         #Full Quant(Not implemented)
         #z_bar = (Qd - Qs).detach() + Qs
@@ -241,7 +241,7 @@ class Autoencoder(torch.nn.Module):
 #Training Method with MSE Loss Function and Adam Optimizer
 def train(dataloader, model, loss_fn, optimizer):
     #Initialize Vars
-    train_batches = 1 #Amount of Batches to work through per epoch
+    train_batches = 32 #Amount of Batches to work through per epoch
     tot_loss = 0
 
     #Setting Model Setting to Train
@@ -360,7 +360,7 @@ def show(original_batchList, reconstructed_batchList):
 def main(is_train, model_name, codebook_length):
     if (is_train):
         in_channels = 1  # Assuming grayscale video frames
-        epochs = 1
+        epochs = 32
         losses = []
         batches_list = []
 
