@@ -213,7 +213,7 @@ class Autoencoder(torch.nn.Module):
 
         #Calculate Qs, size(code_length x 32 x 32 x 20 x 8 x 8)
         #print("Centroids: " + str(numpy_centroids.shape))
-        Qs = torch.ones(centroids.shape)
+        Qs = torch.ones(centroids.shape).to(device)
         for i in range(self.codebook_length):
             distance = (abs(x - centroids[i, :]))
             Qs[i] = torch.exp(-self.tau*distance)
