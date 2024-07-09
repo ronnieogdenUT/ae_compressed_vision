@@ -114,7 +114,7 @@ class Autoencoder(torch.nn.Module):
         self.tau = 10
         #z output from encoder as B x D x Channels x L x W
         #Initialize centroids to 32x32x20x8x8xL
-        self.centroids = nn.Parameter(torch.ones([codebook_length, 32,32,20,8,8], dtype = torch.float32).to("cpu"))
+        self.centroids = nn.Parameter(torch.ones([codebook_length, 32,32,20,8,8], dtype = torch.float32).to(device))
         torch.nn.init.kaiming_uniform_(self.centroids, mode="fan_in", nonlinearity="relu")
         self.codebook_length = codebook_length
 
@@ -207,13 +207,11 @@ class Autoencoder(torch.nn.Module):
         #Get closest centroid
         #Qd = torch.argmin(distances, dim=1)
 
-        total_sum = torch.ones(centroids.shape)
-
         #print(total_sum)
 
         #Calculate Qs, size(code_length x 32 x 32 x 20 x 8 x 8)
         #print("Centroids: " + str(numpy_centroids.shape))
-        Qs = torch.ones(centroids.shape)
+        Qs = torch.ones(centroids.shape).to(device)
         for i in range(self.codebook_length):
             distance = (abs(x - centroids[i, :]))
             Qs[i] = torch.exp(-self.tau*distance)
