@@ -9,7 +9,9 @@ import math
 #from pytorch_msssim import ms_ssim
 from torch.utils.data.sampler import SubsetRandomSampler
 
-# Import MovingMNIST Dataset
+import quantizer
+
+#Import MovingMNIST Dataset
 data = datasets.MovingMNIST(
     root="./data",
     download=True
