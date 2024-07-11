@@ -127,6 +127,7 @@ class Autoencoder(torch.nn.Module):
         self.encoderConv3 = torch.nn.Conv3d(128, 32, 5, stride=(1,2,2))
         self.encoderBn3 = torch.nn.BatchNorm3d(32)  
 
+        self.resblock_a = resblock_a()
         self.resblock_b = resblock_b()
         
         # Figure out if resblock_c needs to be a transposed version... I think they are the same here		
@@ -151,7 +152,13 @@ class Autoencoder(torch.nn.Module):
         x = self.encoderConv2(x)
         x = self.encoderBn2(x)
         x = f.relu(x)
+        
         x = self.resblock_b(x)
+        x = self.resblock_b(x)
+        x = self.resblock_b(x)
+        x = self.resblock_b(x)
+        x = self.resblock_b(x)
+        x = self.resblock_a(x)
 
         x = f.pad(x, self.same_pad(x, stride, 5))
         x = self.encoderConv3(x)
@@ -164,7 +171,13 @@ class Autoencoder(torch.nn.Module):
         x = self.decoderConv1(quantized_x)
         x = self.decoderBn1(x)
         x = f.relu(x)
+
         x = self.resblock_b(x)
+        x = self.resblock_b(x)
+        x = self.resblock_b(x)
+        x = self.resblock_b(x)
+        x = self.resblock_b(x)
+        x = self.resblock_a(x)
 
         x = self.decoderConv2(x)
         x = self.decoderBn2(x)
