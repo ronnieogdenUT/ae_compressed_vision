@@ -305,7 +305,6 @@ def test(dataloader, model, loss_fn):
 
         for (batch_num, batch) in enumerate(dataloader):
             # Measure time for the forward pass of each video
-            video_start_time = time.perf_counter()
             print ("Batch: " + str(batch_num))
             batch = batch.to(device)
 
@@ -314,22 +313,22 @@ def test(dataloader, model, loss_fn):
 
             #Shift Tensor from size (32,20,1,64,64) to size(32,1,20,64,64)
             batch = torch.permute(batch, (0,2,1,3,4))
-
+            
+            video_start_time = time.perf_counter()
             # Output of Autoencoder
             reconstructed = model(batch)
+            video_end_time = time.perf_counter()
 
             #Calculate Loss
             loss = loss_fn(reconstructed, batch).item()
             tot_loss = tot_loss + loss
             
-            video_end_time = time.perf_counter()
             video_elapsed_time = video_end_time - video_start_time
             print(f"Video {batch_num + 1}/{num_testBatches} processed in {video_elapsed_time:.6f} seconds")
-            #Every "num_videos_show" batches append first vid: originial and reconstructed
            
             
             # Measure time for each frame
-            num_frames = batch.size(2)  # Assuming batch size is (batch, channels, depth, height, width)
+            num_frames = batch.size(1)
             for frame_idx in range(num_frames):
                 frame_start_time = time.perf_counter()  # Start timing for each frame
                 # Simulate frame processing (no actual frame processing here as it's done in batch)
