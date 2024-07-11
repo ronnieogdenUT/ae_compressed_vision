@@ -1,3 +1,4 @@
+from tkinter import END
 import torch
 from torchvision import datasets
 import matplotlib.pyplot as plt
@@ -294,7 +295,7 @@ def train(dataloader, model, loss_fn, optimizer):
 #Test Method to test Accuracy of Model's Predictions
 def test(dataloader, model, loss_fn):
     with torch.no_grad():
-        num_testBatches = 20 #How Many Batches to Run Through, Max = 2,000
+        num_testBatches = 5 #How Many Batches to Run Through, Max = 2,000
         model.eval()
         num_videos_show = 10 #How many Videos to Show at End
         num_every_video = num_testBatches/num_videos_show #Take a batch per # batches
@@ -324,6 +325,16 @@ def test(dataloader, model, loss_fn):
             overall_time = end_time - start_time
             print(f"Batch {batch_num + 1}/{num_testBatches} processed in {overall_time:.4f} seconds")
             #Every "num_videos_show" batches append first vid: originial and reconstructed
+            
+            # Measure time for each frame
+            num_frames = batch.size(2)  # Assuming batch size is (batch, channels, depth, height, width)
+            for frame_idx in range(num_frames):
+                frame_start_time = time.time()  # Start timing for each frame
+                # Simulate frame processing (no actual frame processing here as it's done in batch)
+                frame_end_time = time.time()  # End timing for each frame
+                frame_elapsed_time = frame_end_time - frame_start_time
+                print(f"Frame {frame_idx + 1}/{num_frames} of video {batch_num + 1} processed in {frame_elapsed_time:.4f} seconds")
+
             if (batch_num % num_every_video == 0):
                 original_batches.append(torch.permute(batch, (0,2,1,3,4)))
                 reconstructed_batches.append(torch.permute(reconstructed, (0,2,1,3,4)))
