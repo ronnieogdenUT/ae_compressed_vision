@@ -17,14 +17,14 @@ from autoencoder import Autoencoder
 #Training Method with MSE Loss Function and Adam Optimizer
 #Purpose: Iterate through (train_batches) batches and backpropagate 
 #
-def train_multiple(dataloader, model, loss_fn, optimizer, epochs, model_name):
+def train_multiple(dataloader, model, loss_fn, optimizer, epochs, model_name, device):
     #Uses Trainloader to Run Videos through model and appends first batch of every epoch to batches_list
     in_channels = 1
     losses = []
 
     for epoch in range(epochs):
         print ("Epoch: " + str(epoch+1), end = "")
-        epoch_loss = train_epoch(train_loader, model, loss_fn, optimizer)
+        epoch_loss = train_epoch(dataloader, model, loss_fn, optimizer, device)
         print ("  |   Loss = " + str(epoch_loss))
         losses.append(epoch_loss)
         
@@ -33,7 +33,7 @@ def train_multiple(dataloader, model, loss_fn, optimizer, epochs, model_name):
     print("Saved Model")
     return losses
 
-def train_epoch(dataloader, model, loss_fn, optimizer):
+def train_epoch(dataloader, model, loss_fn, optimizer, device):
     #Initialize Vars
     train_batches = 64 #Amount of Batches to work through per epoch
     tot_loss = 0
@@ -86,7 +86,7 @@ def train(dataloader, model_name, codebook_length, device, model_exist):
     optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer for model weights
 
     
-    losses = train_multiple(dataloader, model, loss_fn, optimizer, epochs, model_name)
+    losses = train_multiple(dataloader, model, loss_fn, optimizer, epochs, model_name, device)
 
     # Plotting the loss function
     plt.plot(losses)
