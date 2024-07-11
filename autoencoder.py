@@ -62,7 +62,7 @@ class resblock_c(torch.nn.Module):
         return out
 
 class Autoencoder(torch.nn.Module):
-    def __init__(self, in_channels, codebook_length, device):
+    def __init__(self, in_channels, codebook_length, device, batch_size):
         super().__init__()
         self.tau = 10
         self.device = device

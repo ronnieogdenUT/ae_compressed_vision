@@ -68,7 +68,7 @@ is_train = True
 codebook_length = 20
 function_run = sys.argv[1]
 if function_run == 'train':
-    train(train_loader, model_name, codebook_length, device, model_exist)
+    train(train_loader, model_name, codebook_length, device, model_exist, batch_size)
 elif function_run == 'test':
     test(train_loader, model_name, codebook_length, device)
 else:
