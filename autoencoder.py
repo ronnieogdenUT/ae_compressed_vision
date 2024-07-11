@@ -328,7 +328,7 @@ def test(dataloader, model, loss_fn):
            
             
             # Measure time for each frame
-            num_frames = batch.size(1)
+            num_frames = batch.size(5)
             for frame_idx in range(num_frames):
                 frame_start_time = time.perf_counter()  # Start timing for each frame
                 # Simulate frame processing (no actual frame processing here as it's done in batch)
