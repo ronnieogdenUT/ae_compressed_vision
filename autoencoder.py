@@ -114,7 +114,7 @@ class Autoencoder(torch.nn.Module):
         super().__init__()
         self.tau = 10
         #z output from encoder as B x D x Channels x L x W
-        #Initialize centroids to 32x32x20x8x8xL
+        #Initialize centroids to Lx 16 x 32 x 20 x 8 x 8
         self.centroids = nn.Parameter(torch.ones([codebook_length, batch_size,32,20,8,8], dtype = torch.float32).to(device))
         torch.nn.init.kaiming_uniform_(self.centroids, mode="fan_in", nonlinearity="relu")
         self.codebook_length = codebook_length
@@ -127,8 +127,6 @@ class Autoencoder(torch.nn.Module):
         self.encoderConv3 = torch.nn.Conv3d(128, 32, 5, stride=(1,2,2))
         self.encoderBn3 = torch.nn.BatchNorm3d(32)  
 
-        self.resblock_a = resblock_a()
-        self.resblock_b = resblock_b()
         self.resblock_c = resblock_c()
         
         # Figure out if resblock_c needs to be a transposed version... I think they are the same here		
@@ -217,9 +215,9 @@ class Autoencoder(torch.nn.Module):
         quantized_x = (Qs * centroids)/torch.sum(Qs)
 
         #Multiply Qs with centroids to get closest Codebook Value
-        #Multiplies Qs(L x 32 x 32 x 20 x 8 x 8) and centroids(L x 32 x 32 x 20 x 8 x 8) and converts to tensor
+        #Multiplies Qs(L x 16 x 32 x 20 x 8 x 8) and centroids(L x 16 x 32 x 20 x 8 x 8) and converts to tensor
 
-        #Now we have the L x 32 x 32 x 20 x 8 x 8, which should entirely be one codebook value with 
+        #Now we have the L x 16 x 32 x 20 x 8 x 8, which should entirely be one codebook value with 
         quantized_x = torch.sum(quantized_x, dim=0)
 
         #Reduced down to the one codebook value
@@ -245,7 +243,7 @@ def train(dataloader, model, loss_fn, optimizer):
         #Convert Int8 Tensor to NP-usable Float32
         batch = batch.to(torch.float32)
 
-        #Shift Tensor from size (32,20,1,64,64) to size(32,1,20,64,64)
+        #Shift Tensor from size (16,20,1,64,64) to size(16,1,20,64,64)
         batch = torch.permute(batch, (0,2,1,3,4))
 
         # Output of Autoencoder
