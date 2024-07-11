@@ -62,15 +62,10 @@ device = (
 print(f"Using {device} device")
 
 #Call Main Function
-model_exist = True
+model_exist = False
 codebook_length = 20
 function_run = sys.argv[1]
-model_name = sys.argv[2]
-if model_name != "":
-    model_name += ".pth"
-else:
-    model_exist = False
-    model_name = "model2.pth"
+model_name = sys.argv[2] + ".pth"
 
     
 if function_run == 'train':
