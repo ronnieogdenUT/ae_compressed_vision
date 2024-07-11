@@ -14,9 +14,8 @@ import gc
 import autoencoder
 from autoencoder import Autoencoder
 
-def train_epoch(dataloader, model, loss_fn, optimizer, device):
+def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches):
     #Initialize Vars
-    train_batches = 64 #Amount of Batches to work through per epoch
     tot_loss = 0
     
 
@@ -59,6 +58,7 @@ def train(dataloader, model_name, codebook_length, device, model_exist):
     in_channels = 1
     epochs = 10
     losses = []
+    train_batches = 64
 
     model = Autoencoder(in_channels, codebook_length, device).to(device) #Intialize Model
     if (model_exist == True):
@@ -69,7 +69,7 @@ def train(dataloader, model_name, codebook_length, device, model_exist):
     
     for epoch in range(epochs):
         print ("Epoch: " + str(epoch+1), end = "")
-        epoch_loss = train_epoch(dataloader, model, loss_fn, optimizer, device)
+        epoch_loss = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches)
         print ("  |   Loss = " + str(epoch_loss))
         losses.append(epoch_loss)
         

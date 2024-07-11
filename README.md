@@ -97,23 +97,55 @@ Description: This file containers a neural network model and the capability to t
             int pad_left - padding for left side(pad_along_width/2)
             tuple output - size 6 tuple of paddings for all sides
 
-### def train(dataloader, model, loss_fn, optimizer)
+### def train(dataloader, model_name, codebook_length, device, model_exist)
         Purpose:
-            Trains Model using Adam optimizer and calculating MSE loss
+            Trains Model
+            Initializes Model
+            If model_exist is true, load parameters of model from file
+            Initialize loss function and optimizer
+            Iterates through int epochs and calls train_epoch
+            Appends epoch_loss to list losses
+            Displays graph of epoch_loss over iterations
         Input:
-            Dataloader dataloader - dataloader object that wraps around MNIST dataset with batch_size = 32
-            Autoencoder model - instance of class autoencoder
-            loss_fn - MSE loss function
-            optimizer - adam optimizer
+            Dataloader dataloader - dataloader object that wraps around MNIST dataset with batch_size = 16
+            str model_name - name of model to be imported or saved into a file
+            int codebook_length - length of codebook/ num of values to be trained
+            str device - device to train on(cuda or cpu)
+            bool model_exist - whether model exists or not
         Output:
-            tensor reconstructed - last batch of epoch reconstructed through model of size (32,20,1,64,64)
+            N/A
+            prints out epoch loss & loss per epoch on graph
         Variables:
+            
             int train_batches - amount of batches to train per epoch
-            list losses - list of losses per batch
+            int epochs - number of epochs to train model on (train_batches) batches
+            list losses - list of losses per epoch
+            int in_channels - number of channels for input(1 for grayscale)
+            int epoch_loss - loss per epoch
+
+### def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches)
+        Purpose:
+            Trains model
+            Iterates through batches on an individual Epoch
+            Moves Batch to device
+            Transforms batch to model-ready input
+            Calculates loss for batch and adds it to total epoch loss
+            Uses Adam optimizer and MSE loss on backward pass
+            If batch_num is at train_batches, return epoch loss
+        Input:
+            Dataloader dataloader - dataloader object that wraps around MNIST dataset with batch_size = 16
+            str model_name - name of model to be imported or saved into a file
+            int codebook_length - length of codebook/ num of values to be trained
+            str device - device to train on(cuda or cpu)
+            bool model_exist - whether model exists or not
+        Output:
+            int tot_loss - total loss for that epoch
+        Variables:
             int batch_num - iterable for batches in dataloader
-            tensor batch - tensor of size (32,20,1,64,64): 32 sets of 20 frame videos
+            tensor batch - tensor of size (16,20,1,64,64): 16 sets of 20 frame videos
             tensor reconstructed - batch after pass through model
             int loss - loss from MSE loss calculation
+            loss_fn - MSE loss function
 
     
 ### def test(dataloader, model, loss_fn)
