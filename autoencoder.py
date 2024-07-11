@@ -126,7 +126,7 @@ class Autoencoder(torch.nn.Module):
         self.encoderConv3 = torch.nn.Conv3d(128, 32, 5, stride=(1,2,2))
         self.encoderBn3 = torch.nn.BatchNorm3d(32)  
 
-        self.resblock_c = resblock_c()
+        resblock_c()
         
         # Figure out if resblock_c needs to be a transposed version... I think they are the same here		
         #Decoder
