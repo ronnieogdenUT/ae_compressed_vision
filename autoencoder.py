@@ -304,7 +304,8 @@ def test(dataloader, model, loss_fn):
         tot_loss = 0
 
         for (batch_num, batch) in enumerate(dataloader):
-            start_time = time.time()
+            # Measure time for the forward pass of each video
+            video_start_time = time.perf_counter()
             print ("Batch: " + str(batch_num))
             batch = batch.to(device)
 
@@ -320,18 +321,19 @@ def test(dataloader, model, loss_fn):
             #Calculate Loss
             loss = loss_fn(reconstructed, batch).item()
             tot_loss = tot_loss + loss
-
-            end_time = time.time()
-            overall_time = end_time - start_time
-            print(f"Batch {batch_num + 1}/{num_testBatches} processed in {overall_time:.4f} seconds")
+            
+            video_end_time = time.perf_counter()
+            video_elapsed_time = video_end_time - video_start_time
+            print(f"Video {batch_num + 1}/{num_testBatches} processed in {video_elapsed_time:.6f} seconds")
             #Every "num_videos_show" batches append first vid: originial and reconstructed
+           
             
             # Measure time for each frame
             num_frames = batch.size(2)  # Assuming batch size is (batch, channels, depth, height, width)
             for frame_idx in range(num_frames):
-                frame_start_time = time.time()  # Start timing for each frame
+                frame_start_time = time.perf_counter()  # Start timing for each frame
                 # Simulate frame processing (no actual frame processing here as it's done in batch)
-                frame_end_time = time.time()  # End timing for each frame
+                frame_end_time = time.perf_counter()  # End timing for each frame
                 frame_elapsed_time = frame_end_time - frame_start_time
                 print(f"Frame {frame_idx + 1}/{num_frames} of video {batch_num + 1} processed in {frame_elapsed_time:.4f} seconds")
 
