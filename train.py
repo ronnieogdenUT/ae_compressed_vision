@@ -86,7 +86,7 @@ def train(dataloader, model_name, codebook_length, device, model_exist):
     optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer for model weights
 
     
-    losses = train(dataloader, model, loss_fn, optimizer, epochs, model_name)
+    losses = train_multiple(dataloader, model, loss_fn, optimizer, epochs, model_name)
 
     # Plotting the loss function
     plt.plot(losses)
