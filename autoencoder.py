@@ -62,13 +62,13 @@ class resblock_c(torch.nn.Module):
         return out
 
 class Autoencoder(torch.nn.Module):
-    def __init__(self, in_channels, codebook_length, device, batch_size):
+    def __init__(self, in_channels, codebook_length, device):
         super().__init__()
         self.tau = 10
         self.device = device
         #z output from encoder as B x D x Channels x L x W
         #Initialize centroids to Lx 16 x 32 x 20 x 8 x 8
-        self.centroids = nn.Parameter(torch.ones((codebook_length, batch_size,32,20,8,8), dtype = torch.float32).to(device))
+        self.centroids = nn.Parameter(torch.ones((codebook_length, 16,32,20,8,8), dtype = torch.float32).to(device))
         torch.nn.init.kaiming_uniform_(self.centroids, mode="fan_in", nonlinearity="relu")
         self.codebook_length = codebook_length
 

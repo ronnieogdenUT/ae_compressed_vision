@@ -74,11 +74,11 @@ def train_epoch(dataloader, model, loss_fn, optimizer):
             break
 
 
-def train(dataloader, model_name, codebook_length, device, model_exist, batch_size):
+def train(dataloader, model_name, codebook_length, device, model_exist):
     in_channels = 1
     epochs = 10
 
-    model = Autoencoder(in_channels, codebook_length, device, batch_size).to(device) #Intialize Model
+    model = Autoencoder(in_channels, codebook_length, device).to(device) #Intialize Model
     if (model_exist == True):
         model.load_state_dict(torch.load(model_name))
 
