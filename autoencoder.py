@@ -7,6 +7,7 @@ import numpy as np
 import torch.nn as nn
 import matplotlib.animation as animation
 import math
+import time
 torch.cuda.empty_cache()
 #from pytorch_msssim import ms_ssim
 from torch.utils.data.sampler import SubsetRandomSampler
@@ -137,7 +138,7 @@ class Autoencoder(torch.nn.Module):
         self.decoderBn2 = torch.nn.BatchNorm3d(64)
         self.decoderConv3 = torch.nn.ConvTranspose3d(64, in_channels, 5, stride=(1,2,2), padding=2, output_padding=(0,1,1))
         self.decoderBn3 = torch.nn.BatchNorm3d(in_channels)
-
+        
     def forward(self, x):
         stride = (1,2,2)
 
@@ -250,6 +251,8 @@ def train(dataloader, model, loss_fn, optimizer):
 
     #Iterating Through Dataloader
     for (batch_num, batch) in enumerate(dataloader):
+        #start time
+        start_time = time.time()
         #print ("Batch: " + str(batch_num+1))
         batch = batch.to(device)
         #print ("Batch: " + str(batch_num+1))
@@ -277,7 +280,11 @@ def train(dataloader, model, loss_fn, optimizer):
         optimizer.step()
 
         #print (f"Loss: {loss}")
-
+        # end time
+        end_time = time.time()
+        #overall time it took
+        overall_time = end_time - start_time
+        print(f"Batch {batch_num + 1}/{train_batches} processed in {overall_time:.4f} seconds")
         #Setting Number of Batches per Epoch
         if ((batch_num  + 1) == train_batches):
             return tot_loss
@@ -296,6 +303,7 @@ def test(dataloader, model, loss_fn):
         tot_loss = 0
 
         for (batch_num, batch) in enumerate(dataloader):
+            start_time = time.time()
             print ("Batch: " + str(batch_num))
             batch = batch.to(device)
 
@@ -312,6 +320,9 @@ def test(dataloader, model, loss_fn):
             loss = loss_fn(reconstructed, batch).item()
             tot_loss = tot_loss + loss
 
+            end_time = time.time()
+            overall_time = end_time - start_time
+            print(f"Batch {batch_num + 1}/{num_testBatches} processed in {overall_time:.4f} seconds")
             #Every "num_videos_show" batches append first vid: originial and reconstructed
             if (batch_num % num_every_video == 0):
                 original_batches.append(torch.permute(batch, (0,2,1,3,4)))
