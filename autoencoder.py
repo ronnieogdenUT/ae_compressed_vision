@@ -362,6 +362,7 @@ def show(original_batchList, reconstructed_batchList):
 #Main Function 
 def main(is_train, model_name, codebook_length):
     if (is_train):
+        in_channels = 1
         epochs = 10
 
         model = Autoencoder(in_channels, codebook_length).to(device) #Intialize Model
