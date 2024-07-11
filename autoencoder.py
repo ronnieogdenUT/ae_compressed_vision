@@ -35,7 +35,7 @@ train_sampler = SubsetRandomSampler(train_indices)
 test_sampler = SubsetRandomSampler(test_indices)
 
 #Initialize Dataloader over training data
-batch_size = 32
+batch_size = 16
 train_loader = torch.utils.data.DataLoader(
     dataset = data,
     batch_size = batch_size, 
@@ -115,7 +115,7 @@ class Autoencoder(torch.nn.Module):
         self.tau = 10
         #z output from encoder as B x D x Channels x L x W
         #Initialize centroids to 32x32x20x8x8xL
-        self.centroids = nn.Parameter(torch.ones([codebook_length, 32,32,20,8,8], dtype = torch.float32).to(device))
+        self.centroids = nn.Parameter(torch.ones([codebook_length, batch_size,32,20,8,8], dtype = torch.float32).to(device))
         torch.nn.init.kaiming_uniform_(self.centroids, mode="fan_in", nonlinearity="relu")
         self.codebook_length = codebook_length
 
@@ -154,9 +154,7 @@ class Autoencoder(torch.nn.Module):
         x = self.encoderBn2(x)
         x = f.relu(x)
 
-        x = self.resblock_b(x)
-        x = self.resblock_b(x)
-        x = self.resblock_a(x)
+        x = self.resblock_c(x)
 
         x = f.pad(x, self.same_pad(x, stride, 5))
         x = self.encoderConv3(x)
@@ -170,9 +168,7 @@ class Autoencoder(torch.nn.Module):
         x = self.decoderBn1(x)
         x = f.relu(x)
 
-        x = self.resblock_b(x)
-        x = self.resblock_b(x)
-        x = self.resblock_a(x)
+        x = self.resblock_c(x)
 
         x = self.decoderConv2(x)
         x = self.decoderBn2(x)
@@ -244,6 +240,7 @@ def train(dataloader, model, loss_fn, optimizer):
     #Iterating Through Dataloader
     for (batch_num, batch) in enumerate(dataloader):
         batch = batch.to(device)
+        print("Batch: " + str(batch_num + 1))
 
         #Convert Int8 Tensor to NP-usable Float32
         batch = batch.to(torch.float32)
