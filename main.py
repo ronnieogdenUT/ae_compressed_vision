@@ -70,6 +70,9 @@ if model_name != "":
     model_name += ".pth"
 else:
     model_exist = False
+    model_name = "model2"
+
+    
 if function_run == 'train':
     train(train_loader, model_name, codebook_length, device, model_exist)
 elif function_run == 'test':
