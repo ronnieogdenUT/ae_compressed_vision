@@ -70,7 +70,7 @@ if model_name != "":
     model_name += ".pth"
 else:
     model_exist = False
-    model_name = "model2"
+    model_name = "model2.pth"
 
     
 if function_run == 'train':
