@@ -428,6 +428,6 @@ def main(is_train, model_name, codebook_length):
 #Call Main Function
 model_name = "modelQuant.pth"
 model_exist = True
-is_train = True
+is_train = False
 codebook_length = 20
 main(is_train, model_name, codebook_length)
