@@ -73,7 +73,7 @@ def train(dataloader, model_name, codebook_length, device, model_exist):
         print ("  |   Loss = " + str(epoch_loss))
         losses.append(epoch_loss)
         
-        gc.collect()
+        print(torch.cuda.memory_allocated())
     torch.save(model.state_dict(), model_name)
     print("Saved Model")
 
