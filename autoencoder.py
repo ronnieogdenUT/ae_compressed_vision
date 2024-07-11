@@ -226,6 +226,8 @@ class Autoencoder(torch.nn.Module):
     
 
 #Training Method with MSE Loss Function and Adam Optimizer
+#Purpose: Iterate through (train_batches) batches and backpropagate 
+#
 def train(dataloader, model, loss_fn, optimizer):
     #Initialize Vars
     train_batches = 32 #Amount of Batches to work through per epoch
