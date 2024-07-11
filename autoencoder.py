@@ -126,7 +126,7 @@ class Autoencoder(torch.nn.Module):
         self.encoderConv3 = torch.nn.Conv3d(128, 32, 5, stride=(1,2,2))
         self.encoderBn3 = torch.nn.BatchNorm3d(32)  
 
-        #self.resblock_c = resblock_c()
+        self.resblock_c = resblock_c()
         
         # Figure out if resblock_c needs to be a transposed version... I think they are the same here		
         #Decoder
@@ -150,7 +150,7 @@ class Autoencoder(torch.nn.Module):
         x = self.encoderConv2(x)
         x = self.encoderBn2(x)
         x = f.relu(x)
-        #x = resblock_c(x)
+        x = resblock_c(x)
 
         x = f.pad(x, self.same_pad(x, stride, 5))
         x = self.encoderConv3(x)
@@ -228,7 +228,7 @@ class Autoencoder(torch.nn.Module):
         quantized_x = torch.sum(quantized_x, dim=0)
 
         #Reduced down to the one codebook value
-        print(quantized_x)
+        #print(quantized_x)
 
         #Full Quant(Not implemented)
         #z_bar = (Qd - Qs).detach() + Qs
@@ -241,6 +241,7 @@ def train(dataloader, model, loss_fn, optimizer):
     #Initialize Vars
     train_batches = 1 #Amount of Batches to work through per epoch
     tot_loss = 0
+    
 
     #Setting Model Setting to Train
     model.train()
@@ -283,42 +284,42 @@ def train(dataloader, model, loss_fn, optimizer):
 
 #Test Method to test Accuracy of Model's Predictions
 def test(dataloader, model, loss_fn):
-    num_testBatches = 20 #How Many Batches to Run Through, Max = 2,000
-    model.eval()
-    num_videos_show = 10 #How many Videos to Show at End
-    num_every_video = num_testBatches/num_videos_show #Take a batch per # batches
-    original_batches = []
-    reconstructed_batches = []
-    tot_loss = 0
+    with torch.no_grad(): 
+        num_testBatches = 20 #How Many Batches to Run Through, Max = 2,000
+        num_videos_show = 10 #How many Videos to Show at End
+        num_every_video = num_testBatches/num_videos_show #Take a batch per # batches
+        original_batches = []
+        reconstructed_batches = []
+        tot_loss = 0
 
-    for (batch_num, batch) in enumerate(dataloader):
-        print ("Batch: " + str(batch_num))
-        batch = batch.to(device)
+        for (batch_num, batch) in enumerate(dataloader):
+            print ("Batch: " + str(batch_num))
+            batch = batch.to(device)
 
-        #Convert Int8 Tensor to NP-usable Float32
-        batch = batch.to(torch.float32)
+            #Convert Int8 Tensor to NP-usable Float32
+            batch = batch.to(torch.float32)
 
-        #Shift Tensor from size (32,20,1,64,64) to size(32,1,20,64,64)
-        batch = torch.permute(batch, (0,2,1,3,4))
+            #Shift Tensor from size (32,20,1,64,64) to size(32,1,20,64,64)
+            batch = torch.permute(batch, (0,2,1,3,4))
 
-        # Output of Autoencoder
-        reconstructed = model(batch)
+            # Output of Autoencoder
+            reconstructed = model(batch)
 
-        #Calculate Loss
-        loss = loss_fn(reconstructed, batch).item()
-        tot_loss = tot_loss + loss
+            #Calculate Loss
+            loss = loss_fn(reconstructed, batch).item()
+            tot_loss = tot_loss + loss
 
-        #Every "num_videos_show" batches append first vid: originial and reconstructed
-        if (batch_num % num_every_video == 0):
-            original_batches.append(torch.permute(batch, (0,2,1,3,4)))
-            reconstructed_batches.append(torch.permute(reconstructed, (0,2,1,3,4)))
+            #Every "num_videos_show" batches append first vid: originial and reconstructed
+            if (batch_num % num_every_video == 0):
+                original_batches.append(torch.permute(batch, (0,2,1,3,4)))
+                reconstructed_batches.append(torch.permute(reconstructed, (0,2,1,3,4)))
 
 
-        #Setting Number of Batches to Test
-        if ((batch_num  + 1) == num_testBatches):
-            break
-    avg_loss = tot_loss/num_testBatches
-    return original_batches, reconstructed_batches, avg_loss
+            #Setting Number of Batches to Test
+            if ((batch_num  + 1) == num_testBatches):
+                break
+        avg_loss = tot_loss/num_testBatches
+        return original_batches, reconstructed_batches, avg_loss
 
 
 #Display Reconstructed vs Original
@@ -366,7 +367,6 @@ def main(is_train, model_name, codebook_length):
         if (model_exist == True):
             model.load_state_dict(torch.load(model_name))
 
-        
         loss_fn = nn.MSELoss() #Intialize Loss Function
         optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer for model weights
 
@@ -412,7 +412,7 @@ def main(is_train, model_name, codebook_length):
 
 #Call Main Function
 model_name = "modelQuant.pth"
-model_exist = False
-is_train = True
+model_exist = True
+is_train = False
 codebook_length = 20
 main(is_train, model_name, codebook_length)
