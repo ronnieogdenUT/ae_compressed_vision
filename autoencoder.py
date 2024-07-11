@@ -240,7 +240,7 @@ class Autoencoder(torch.nn.Module):
 #Training Method with MSE Loss Function and Adam Optimizer
 def train(dataloader, model, loss_fn, optimizer):
     #Initialize Vars
-    train_batches = 1 #Amount of Batches to work through per epoch
+    train_batches = 32 #Amount of Batches to work through per epoch
     tot_loss = 0
     
 
@@ -360,7 +360,7 @@ def show(original_batchList, reconstructed_batchList):
 def main(is_train, model_name, codebook_length):
     if (is_train):
         in_channels = 1  # Assuming grayscale video frames
-        epochs = 1
+        epochs = 10
         losses = []
         batches_list = []
 
