@@ -264,7 +264,7 @@ def train(dataloader, model, loss_fn, optimizer):
 
         #Calculate Loss
         loss = loss_fn(reconstructed, batch)
-        int_loss = loss.item()
+        int_loss = loss.item().detach()
         #print("Batch Loss: " + str(int_loss))
         tot_loss = tot_loss + int_loss
 
