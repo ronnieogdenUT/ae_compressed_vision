@@ -230,7 +230,7 @@ class Autoencoder(torch.nn.Module):
 #
 def train(dataloader, model, loss_fn, optimizer):
     #Initialize Vars
-    train_batches = 32 #Amount of Batches to work through per epoch
+    train_batches = 64 #Amount of Batches to work through per epoch
     tot_loss = 0
     
 
@@ -240,7 +240,7 @@ def train(dataloader, model, loss_fn, optimizer):
     #Iterating Through Dataloader
     for (batch_num, batch) in enumerate(dataloader):
         batch = batch.to(device)
-        print("Batch: " + str(batch_num + 1))
+        #print("Batch: " + str(batch_num + 1))
 
         #Convert Int8 Tensor to NP-usable Float32
         batch = batch.to(torch.float32)
