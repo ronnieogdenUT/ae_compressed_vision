@@ -62,11 +62,11 @@ device = (
 print(f"Using {device} device")
 
 #Call Main Function
-model_name = "modelQuant.pth"
 model_exist = False
 is_train = True
 codebook_length = 20
 function_run = sys.argv[1]
+model_name = sys.argv[2] + ".pth"
 if function_run == 'train':
     train(train_loader, model_name, codebook_length, device, model_exist)
 elif function_run == 'test':
