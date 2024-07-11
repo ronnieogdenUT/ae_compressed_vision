@@ -9,6 +9,7 @@ import matplotlib.animation as animation
 import math
 #from pytorch_msssim import ms_ssim
 from torch.utils.data.sampler import SubsetRandomSampler
+import gc
 torch.cuda.empty_cache()
 
 
@@ -228,7 +229,31 @@ class Autoencoder(torch.nn.Module):
 #Training Method with MSE Loss Function and Adam Optimizer
 #Purpose: Iterate through (train_batches) batches and backpropagate 
 #
-def train(dataloader, model, loss_fn, optimizer):
+def train(dataloader, loss_fn, optimizer, epochs, model_name):
+    #Uses Trainloader to Run Videos through model and appends first batch of every epoch to batches_list
+    in_channels = 1
+    losses = []
+
+    for epoch in range(epochs):
+        model = Autoencoder(in_channels, codebook_length).to(device) #Intialize Model
+        if (model_exist == True):
+            model.load_state_dict(torch.load(model_name))
+        else:
+            model_exist = True
+
+        print ("Epoch: " + str(epoch+1), end = "")
+        epoch_loss = train_epoch(train_loader, model, loss_fn, optimizer)
+        print ("  |   Loss = " + str(epoch_loss))
+        losses.append(epoch_loss)
+        
+        torch.save(model.state_dict(), model_name)
+        print("Saved Model")
+        del model
+        torch.cuda.empty_cache()
+        gc.collect()
+    return losses
+
+def train_epoch(dataloader, model, loss_fn, optimizer):
     #Initialize Vars
     train_batches = 64 #Amount of Batches to work through per epoch
     tot_loss = 0
@@ -345,28 +370,13 @@ def show(original_batchList, reconstructed_batchList):
 #Main Function 
 def main(is_train, model_name, codebook_length):
     if (is_train):
-        in_channels = 1  # Assuming grayscale video frames
         epochs = 10
-        losses = []
-        batches_list = []
-
-        model = Autoencoder(in_channels, codebook_length).to(device) #Intialize Model
-        if (model_exist == True):
-            model.load_state_dict(torch.load(model_name))
 
         loss_fn = nn.MSELoss() #Intialize Loss Function
         optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer for model weights
 
-        #Uses Trainloader to Run Videos through model and appends first batch of every epoch to batches_list
-        for epoch in range(epochs):
-            print ("Epoch: " + str(epoch+1), end = "")
-            epoch_loss = train(train_loader, model, loss_fn, optimizer)
-            print ("  |   Loss = " + str(epoch_loss))
-            losses.append(epoch_loss)
-
-
-        torch.save(model.state_dict(), model_name)
-        print("Saved Model")
+        
+        train(train_loader, model, loss_fn, optimizer, epochs, model_name)
 
         # Plotting the loss function
         plt.plot(losses)
