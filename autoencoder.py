@@ -127,7 +127,7 @@ class Autoencoder(torch.nn.Module):
         self.encoderConv3 = torch.nn.Conv3d(128, 32, 5, stride=(1,2,2))
         self.encoderBn3 = torch.nn.BatchNorm3d(32)  
 
-        self.resblock_c = resblock_c()
+        self.resblock_b = resblock_b()
         
         # Figure out if resblock_c needs to be a transposed version... I think they are the same here		
         #Decoder
@@ -151,7 +151,7 @@ class Autoencoder(torch.nn.Module):
         x = self.encoderConv2(x)
         x = self.encoderBn2(x)
         x = f.relu(x)
-        x = self.resblock_c(x)
+        x = self.resblock_b(x)
 
         x = f.pad(x, self.same_pad(x, stride, 5))
         x = self.encoderConv3(x)
@@ -164,7 +164,7 @@ class Autoencoder(torch.nn.Module):
         x = self.decoderConv1(quantized_x)
         x = self.decoderBn1(x)
         x = f.relu(x)
-        x = self.resblock_c(x)
+        x = self.resblock_b(x)
 
         x = self.decoderConv2(x)
         x = self.decoderBn2(x)
@@ -203,15 +203,8 @@ class Autoencoder(torch.nn.Module):
         return output
     
     def quantize(self, x):
-        #Compute Distances
         centroids = self.centroids
-        #Get closest centroid
-        #Qd = torch.argmin(distances, dim=1)
 
-        #print(total_sum)
-
-        #Calculate Qs, size(code_length x 32 x 32 x 20 x 8 x 8)
-        #print("Centroids: " + str(numpy_centroids.shape))
         Qs = torch.ones(centroids.shape).to(device)
         for i in range(self.codebook_length):
             distance = (abs(x - centroids[i, :]))
@@ -222,17 +215,10 @@ class Autoencoder(torch.nn.Module):
         #Multiply Qs with centroids to get closest Codebook Value
         #Multiplies Qs(L x 32 x 32 x 20 x 8 x 8) and centroids(L x 32 x 32 x 20 x 8 x 8) and converts to tensor
 
-        # print(quantized_x.shape)
-        # print(quantized_x[:, 1, 1, 1, 1, 1])
-
         #Now we have the L x 32 x 32 x 20 x 8 x 8, which should entirely be one codebook value with 
         quantized_x = torch.sum(quantized_x, dim=0)
 
         #Reduced down to the one codebook value
-        #print(quantized_x)
-
-        #Full Quant(Not implemented)
-        #z_bar = (Qd - Qs).detach() + Qs
 
         return quantized_x
     
@@ -249,9 +235,7 @@ def train(dataloader, model, loss_fn, optimizer):
 
     #Iterating Through Dataloader
     for (batch_num, batch) in enumerate(dataloader):
-        #print ("Batch: " + str(batch_num+1))
         batch = batch.to(device)
-        #print ("Batch: " + str(batch_num+1))
 
         #Convert Int8 Tensor to NP-usable Float32
         batch = batch.to(torch.float32)
@@ -265,7 +249,6 @@ def train(dataloader, model, loss_fn, optimizer):
         #Calculate Loss
         loss = loss_fn(reconstructed, batch)
         int_loss = loss.item()
-        #print("Batch Loss: " + str(int_loss))
         tot_loss = tot_loss + int_loss
 
         #Backpropagate
@@ -274,8 +257,6 @@ def train(dataloader, model, loss_fn, optimizer):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
-        #print (f"Loss: {loss}")
 
         #Setting Number of Batches per Epoch
         if ((batch_num  + 1) == train_batches):
