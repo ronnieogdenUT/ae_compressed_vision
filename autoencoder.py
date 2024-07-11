@@ -7,7 +7,7 @@ import numpy as np
 import torch.nn as nn
 import matplotlib.animation as animation
 import math
-from pytorch_msssim import ms_ssim
+#from pytorch_msssim import ms_ssim
 from torch.utils.data.sampler import SubsetRandomSampler
 
 
@@ -412,7 +412,7 @@ def main(is_train, model_name, codebook_length):
 
 #Call Main Function
 model_name = "modelQuant.pth"
-model_exist = True
-is_train = False
+model_exist = False
+is_train = True
 codebook_length = 20
 main(is_train, model_name, codebook_length)
