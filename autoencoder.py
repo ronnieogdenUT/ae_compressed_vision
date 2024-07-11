@@ -129,6 +129,7 @@ class Autoencoder(torch.nn.Module):
 
         self.resblock_a = resblock_a()
         self.resblock_b = resblock_b()
+        self.resblock_c = resblock_c()
         
         # Figure out if resblock_c needs to be a transposed version... I think they are the same here		
         #Decoder
@@ -152,10 +153,7 @@ class Autoencoder(torch.nn.Module):
         x = self.encoderConv2(x)
         x = self.encoderBn2(x)
         x = f.relu(x)
-        
-        x = self.resblock_b(x)
-        x = self.resblock_b(x)
-        x = self.resblock_b(x)
+
         x = self.resblock_b(x)
         x = self.resblock_b(x)
         x = self.resblock_a(x)
@@ -172,9 +170,6 @@ class Autoencoder(torch.nn.Module):
         x = self.decoderBn1(x)
         x = f.relu(x)
 
-        x = self.resblock_b(x)
-        x = self.resblock_b(x)
-        x = self.resblock_b(x)
         x = self.resblock_b(x)
         x = self.resblock_b(x)
         x = self.resblock_a(x)
