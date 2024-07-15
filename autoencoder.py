@@ -179,5 +179,9 @@ class Autoencoder(torch.nn.Module):
         quantized_x = torch.sum(quantized_x, dim=0)
 
         #Reduced down to the one codebook value
+        #Cleanup
+        Qs = None
+        distance = None
+        quantized_shape = None
 
         return quantized_x
