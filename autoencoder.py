@@ -162,14 +162,14 @@ class Autoencoder(torch.nn.Module):
         quantized_shape = (self.codebook_length, 8, 32, 20, 8, 8)
 
         Qs = torch.ones(quantized_shape).to(self.device)
-        print(Qs.shape)
+        #print(Qs.shape)
         for i in range(self.codebook_length):
-            distance = (abs(x - centroids[i, :]))
-            Qs[i] = torch.exp(-self.tau*distance)
+            distance = (abs(x - centroids[i]))
+            Qs[i] = torch.exp(-self.tau*distance) * centroids[i]
 
-        Qs = torch.permute(Qs, (1,2,3,4,5,0))
-        print(Qs.shape)
-        quantized_x = torch.matmul(Qs * centroids)/torch.sum(Qs)
+        #Qs = torch.permute(Qs, (1,2,3,4,0,5))
+        #print(Qs.shape)
+        quantized_x = (Qs)/torch.sum(Qs)
 
         #Multiply Qs with centroids to get closest Codebook Value
         #Multiplies Qs(L x 16 x 32 x 20 x 8 x 8) and centroids(L x 16 x 32 x 20 x 8 x 8) and converts to tensor
