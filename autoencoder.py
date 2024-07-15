@@ -162,6 +162,7 @@ class Autoencoder(torch.nn.Module):
         quantized_shape = (self.codebook_length, 8, 32, 20, 8, 8)
 
         Qs = torch.ones(quantized_shape).to(self.device)
+        print(Qs.element_size() * Qs.nelement())
         #print(Qs.shape)
         for i in range(self.codebook_length):
             distance = (abs(x - centroids[i]))
