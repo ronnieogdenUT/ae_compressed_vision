@@ -75,7 +75,7 @@ def train(dataloader, model_name, codebook_length, device, model_exist):
         print ("  |   Average Loss per Batch = " + str(avg_loss))
         losses.append(avg_loss)
         
-        print(torch.cuda.mem_get_info())
+        print(torch.cuda.mem_get_info()/1000000)
         os.system("nvidia-smi")
     torch.save(model.state_dict(), model_name)
     print("Saved Model")
