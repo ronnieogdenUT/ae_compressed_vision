@@ -168,6 +168,7 @@ class Autoencoder(torch.nn.Module):
             Qs[i] = torch.exp(-self.tau*distance)
 
         Qs = torch.permute(Qs, (1,2,3,4,5,0))
+        print(Qs.shape)
         quantized_x = (Qs * centroids)/torch.sum(Qs)
 
         #Multiply Qs with centroids to get closest Codebook Value
