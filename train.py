@@ -71,10 +71,11 @@ def train(dataloader, model_name, codebook_length, device, model_exist):
     
     for epoch in range(epochs):
         print ("Epoch: " + str(epoch+1), end = "")
+        
         avg_loss = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches)
         print ("  |   Average Loss per Batch = " + str(avg_loss))
         losses.append(avg_loss)
-        
+        print(torch.cuda.memory_summary())
         print(torch.cuda.mem_get_info())
         os.system("nvidia-smi")
     torch.save(model.state_dict(), model_name)
