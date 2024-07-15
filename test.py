@@ -26,7 +26,7 @@ def test(dataloader, model_name, codebook_length, device):
         in_channels = 1  # Assuming grayscale video frames
         losses = []
 
-        model = Autoencoder(in_channels, codebook_length).to(device) #Intialize Model
+        model = Autoencoder(in_channels, codebook_length, device).to(device) #Intialize Model
 
         model.load_state_dict(torch.load(model_name))
         
