@@ -7,38 +7,9 @@ import numpy as np
 import torch.nn as nn
 import matplotlib.animation as animation
 import math
-
-#Import MovingMNIST Training Dataset
-train_data = datasets.MovingMNIST(
-    root = "./data", 
-    download = True
-)
-
-#Import MovingMNIST Test Dataset
-# test_data = datasets.MovingMNIST(
-#     root = "./data", 
-#     split = "test", 
-#     download = True
-# )
-
-
-#Initialize Dataloader over training data
-batch_size = 32
-train_loader = torch.utils.data.DataLoader(
-    dataset = train_data,
-    batch_size = batch_size, 
-    shuffle = True
-)
-
-#Check CUDA Availability
-device = (
-    "cuda"
-    if torch.cuda.is_available()
-    else "mps"
-    if torch.backends.mps.is_available()
-    else "cpu"
-)
-print(f"Using {device} device")
+#from pytorch_msssim import ms_ssim
+from torch.utils.data.sampler import SubsetRandomSampler
+import gc
 
 class resblock_a(torch.nn.Module):
     def __init__(self):
@@ -91,8 +62,15 @@ class resblock_c(torch.nn.Module):
         return out
 
 class Autoencoder(torch.nn.Module):
-    def __init__(self, in_channels):
+    def __init__(self, in_channels, codebook_length, device):
         super().__init__()
+        self.tau = 10
+        self.device = device
+        #z output from encoder as B x D x Channels x L x W
+        #Initialize centroids to Lx 16 x 32 x 20 x 8 x 8
+        self.centroids = nn.Parameter(torch.ones((codebook_length, 8,32,20,8,8), dtype = torch.float32).to(device))
+        torch.nn.init.kaiming_uniform_(self.centroids, mode="fan_in", nonlinearity="relu")
+        self.codebook_length = codebook_length
 
         #Encoder
         self.encoderConv1 = torch.nn.Conv3d(in_channels, 64, 5, stride=(1,2,2))
@@ -100,7 +78,9 @@ class Autoencoder(torch.nn.Module):
         self.encoderConv2 = torch.nn.Conv3d(64, 128, 5, stride=(1,2,2))
         self.encoderBn2 = torch.nn.BatchNorm3d(128)
         self.encoderConv3 = torch.nn.Conv3d(128, 32, 5, stride=(1,2,2))
-        self.encoderBn3 = torch.nn.BatchNorm3d(32)   
+        self.encoderBn3 = torch.nn.BatchNorm3d(32)  
+
+        self.resblock_c = resblock_c()
         
         # Figure out if resblock_c needs to be a transposed version... I think they are the same here		
         #Decoder
@@ -124,17 +104,22 @@ class Autoencoder(torch.nn.Module):
         x = self.encoderConv2(x)
         x = self.encoderBn2(x)
         x = f.relu(x)
-        resblock_c()
+
+        x = self.resblock_c(x)
 
         x = f.pad(x, self.same_pad(x, stride, 5))
         x = self.encoderConv3(x)
         x = self.encoderBn3(x)
 
+        #Quantize
+        quantized_x = self.quantize(x)
+
         #Decoder
-        x = self.decoderConv1(x)
+        x = self.decoderConv1(quantized_x)
         x = self.decoderBn1(x)
         x = f.relu(x)
-        resblock_c()
+
+        x = self.resblock_c(x)
 
         x = self.decoderConv2(x)
         x = self.decoderBn2(x)
@@ -172,131 +157,22 @@ class Autoencoder(torch.nn.Module):
         output = (pad_left, pad_right, pad_top, pad_bottom, pad_forward, pad_backward)
         return output
     
+    def quantize(self, x):
+        centroids = self.centroids
 
-#Training Method with MSE Loss Function and Adam Optimizer
-def train(dataloader, model, loss_fn, optimizer):
-    #Initialize Vars
-    train_batches = 32 #Amount of Batches to work through per epoch
-    losses = []
+        Qs = torch.ones(centroids.shape).to(self.device)
+        for i in range(self.codebook_length):
+            distance = (abs(x - centroids[i, :]))
+            Qs[i] = torch.exp(-self.tau*distance)
 
-    #Setting Model Setting to Train
-    model.train()
+        quantized_x = (Qs * centroids)/torch.sum(Qs)
 
-    #Iterating Through Dataloader
-    for (batch_num, batch) in enumerate(dataloader):
-        batch = batch.to(device)
-        print ("Batch: " + str(batch_num+1))
+        #Multiply Qs with centroids to get closest Codebook Value
+        #Multiplies Qs(L x 16 x 32 x 20 x 8 x 8) and centroids(L x 16 x 32 x 20 x 8 x 8) and converts to tensor
 
-        #Convert Int8 Tensor to NP-usable Float32
-        batch = batch.to(torch.float32)
+        #Now we have the L x 16 x 32 x 20 x 8 x 8, which should entirely be one codebook value with 
+        quantized_x = torch.sum(quantized_x, dim=0)
 
-        #Shift Tensor from size (32,20,1,64,64) to size(32,1,20,64,64)
-        batch = torch.permute(batch, (0,2,1,3,4))
+        #Reduced down to the one codebook value
 
-        # Output of Autoencoder
-        reconstructed = model(batch)
-
-        #Calculate Loss
-        loss = loss_fn(reconstructed, batch)
-
-        #Backpropagate
-        # The gradients are set to zero, the gradient is computed and stored.
-        # .step() performs parameter update
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-
-        # Storing the losses in a list for plotting
-        losses.append(loss.item())
-
-        #Setting Number of Batches per Epoch
-        if ((batch_num  + 1) == train_batches):
-            break
-    return reconstructed
-
-
-#Test Method to test Accuracy of Model's Predictions
-def test(dataloader, model, loss_fn):
-    num_batches = len(dataloader)
-    model.eval()
-
-    num_batches = len(dataloader)
-    tot_loss = 0
-
-    for video in dataloader:
-        video.to(device)
-
-        reconstructed = model(video)
-
-        #Returns val of tensor as int and adds to total loss
-        tot_loss += loss_fn(reconstructed, video).item()
-
-    tot_loss = tot_loss/num_batches
-    print ("Loss: " + tot_loss)
-
-
-#Display Reconstructed vs Original
-def show(batches_list):
-
-    #Define Plot + Axes + Initial Frame List
-    fig, ax = plt.subplots()
-    ims = []
-
-    #Iterates through Batches, , and then through frames in video
-    for batch in batches_list:
-
-        #take first video in batch
-        sample_video = batch[0]
-
-        for frame in sample_video:
-            #convert frame tensor to image(frame[0] because size is (1,64,64))
-            im = ax.imshow(frame[0].cpu().detach().numpy(), animated = True)
-
-            #append frame to frame list
-            ims.append([im])
-
-        #create video from frame list
-        ani = animation.ArtistAnimation(fig, ims, interval = 50, repeat_delay = 1000)
-
-    #display video
-    plt.show()
-
-
-#Main Function 
-def main():
-
-    in_channels = 1  # Assuming grayscale video frames
-    epochs = 32
-    losses = []
-    batches_list = []
-
-    model = Autoencoder(in_channels).to(device) #Intialize Model
-    loss_fn = nn.MSELoss() #Intialize Loss Function
-    optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer
-
-    #Take First Batch from Original Video, append to batches_list
-    for batch in train_loader:
-        batches_list.append(batch)
-        break
-
-    #Uses Trainloader to Run Videos through model and appends first batch of every epoch to batches_list
-    for epoch in range(epochs):
-        print ("Epoch: " + str(epoch+1))
-        reconstructed = train(train_loader, model, loss_fn, optimizer)
-        reconstructed = torch.permute(reconstructed, (0,2,1,3,4))
-        batches_list.append(reconstructed)
-
-    #Calls show function
-    show(batches_list)
-
-    """
-    # Plotting the loss function
-    plt.plot(losses)
-    plt.xlabel('Iterations')
-    plt.ylabel('Loss')
-    plt.title('Training Loss')
-    plt.show()
-    """
-
-#Call Main Function
-main()
+        return quantized_x
