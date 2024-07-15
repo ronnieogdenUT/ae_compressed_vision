@@ -81,7 +81,6 @@ def train(dataloader, model_name, codebook_length, device, model_exist):
         losses.append(avg_loss)
         gc.collect()
         torch.cuda.empty_cache()
-        os.system("nvidia-smi")
     torch.save(model.state_dict(), model_name)
     print("Saved Model")
 
