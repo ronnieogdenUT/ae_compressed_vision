@@ -159,7 +159,7 @@ class Autoencoder(torch.nn.Module):
     
     def quantize(self, x):
         centroids = self.centroids
-        quantized_shape = (self.codebook_length, 32, 32, 20, 8, 8)
+        quantized_shape = (self.codebook_length, 16, 32, 20, 8, 8)
 
         Qs = torch.ones(quantized_shape).to(self.device)
         #print(Qs.shape)
