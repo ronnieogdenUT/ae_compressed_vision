@@ -33,7 +33,7 @@ def test(dataloader, model_name, codebook_length, device):
         loss_fn = nn.MSELoss() #Intialize Loss Function
 
         for (batch_num, batch) in enumerate(dataloader):
-            print ("Batch: " + str(batch_num))
+            print ("Batch: " + str(batch_num+1))
             batch = batch.to(device)
 
             #Convert Int8 Tensor to NP-usable Float32
