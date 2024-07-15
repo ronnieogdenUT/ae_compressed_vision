@@ -50,7 +50,8 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches):
 
         #Setting Number of Batches per Epoch
         if ((batch_num  + 1) == train_batches):
-            return tot_loss
+            avg_loss = tot_loss/train_batches
+            return avg_loss
             break
 
 
@@ -61,21 +62,25 @@ def train(dataloader, model_name, codebook_length, device, model_exist):
     train_batches = 64
 
     model = Autoencoder(in_channels, codebook_length, device).to(device) #Intialize Model
-    if (model_exist == True):
-        model.load_state_dict(torch.load(model_name))
 
     loss_fn = nn.MSELoss() #Intialize Loss Function
     optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer for model weights
     
     for epoch in range(epochs):
+        if (model_exist == True):
+            model.load_state_dict(torch.load(model_name))
+
         print ("Epoch: " + str(epoch+1), end = "")
-        epoch_loss = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches)
-        print ("  |   Loss = " + str(epoch_loss))
-        losses.append(epoch_loss)
+        avg_loss = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches)
+        print ("  |   Average Loss per Batch = " + str(avg_loss))
+        losses.append(avg_loss)
         
-        print(torch.cuda.memory_allocated())
-    torch.save(model.state_dict(), model_name)
-    print("Saved Model")
+        print(torch.cuda.mem_get_info())
+        torch.save(model.state_dict(), model_name)
+        print("Saved Model")
+        
+        model_exist = True
+    
 
     # Plotting the loss function
     plt.plot(losses)
