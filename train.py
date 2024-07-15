@@ -60,7 +60,7 @@ def train(dataloader, model_name, codebook_length, device, model_exist):
     in_channels = 1
     epochs = 10
     losses = []
-    train_batches = 64
+    train_batches = 128
 
     model = Autoencoder(in_channels, codebook_length, device).to(device) #Intialize Model
     if (model_exist == True):
