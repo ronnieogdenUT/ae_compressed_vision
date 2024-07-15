@@ -62,9 +62,9 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches):
 
 def train(dataloader, model_name, codebook_length, device, model_exist):
     in_channels = 1
-    epochs = 10
+    epochs = 5
     losses = []
-    train_batches = 128
+    train_batches = 16
 
     model = Autoencoder(in_channels, codebook_length, device).to(device) #Intialize Model
     if (model_exist == True):
@@ -75,9 +75,9 @@ def train(dataloader, model_name, codebook_length, device, model_exist):
     
     for epoch in range(epochs):
         print ("Epoch: " + str(epoch+1), end = "")
-        
         avg_loss = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches)
         print ("  |   Average Loss per Batch = " + str(avg_loss))
+        print(model.centroids)
         losses.append(avg_loss)
         gc.collect()
         torch.cuda.empty_cache()
