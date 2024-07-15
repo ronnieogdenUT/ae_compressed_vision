@@ -13,6 +13,7 @@ from torch.utils.data.sampler import SubsetRandomSampler
 import gc
 import autoencoder
 from autoencoder import Autoencoder
+import os
 
 def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches):
     #Initialize Vars
@@ -62,24 +63,24 @@ def train(dataloader, model_name, codebook_length, device, model_exist):
     train_batches = 64
 
     model = Autoencoder(in_channels, codebook_length, device).to(device) #Intialize Model
+    if (model_exist == True):
+        model.load_state_dict(torch.load(model_name))
 
     loss_fn = nn.MSELoss() #Intialize Loss Function
     optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer for model weights
     
     for epoch in range(epochs):
-        if (model_exist == True):
-            model.load_state_dict(torch.load(model_name))
-
         print ("Epoch: " + str(epoch+1), end = "")
         avg_loss = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches)
         print ("  |   Average Loss per Batch = " + str(avg_loss))
         losses.append(avg_loss)
         
         print(torch.cuda.mem_get_info())
-        torch.save(model.state_dict(), model_name)
-        print("Saved Model")
-        
-        model_exist = True
+        os.system("nvidia-smi")
+    torch.save(model.state_dict(), model_name)
+    print("Saved Model")
+
+    model_exist = True
     
 
     # Plotting the loss function
