@@ -85,6 +85,6 @@ elif function_run == 'showtrain':
 elif function_run == 'test':
     test(train_loader, model_name, codebook_length, device)
 elif function_run == 'rate-distortion':
-    rate_distortion(train_loader, model_name, codebook_length, device)
+    rate_distortion(train_loader, model_name, codebook_length, device, model_exist)
 else:
     print("Unknown Function")
