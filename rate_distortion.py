@@ -20,7 +20,7 @@ from test import test
 def rate_distortion(train_loader, model_name, codebook_length, device, model_exist):
     codebook_vals = [10, 30]
     is_show = False
-    last_loss = 10
+    last_loss = 1000000
     curr_loss = 5
     first = True
     losses = []
@@ -36,16 +36,12 @@ def rate_distortion(train_loader, model_name, codebook_length, device, model_exi
                         model_exist = True
                         print("Model Found")
                         break
-                curr_loss = train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs)
-                last_loss = curr_loss
                 first = False
                 continue
             else:
                 model_exist = True
                 last_loss = curr_loss
-            
             curr_loss = train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs)
-        losses.append(curr_loss)
     
 def show_rate_distortion(test_loader, model_name, codebook_length, device, model_exist):
     codebook_vals = [10, 30]
