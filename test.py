@@ -16,7 +16,7 @@ from show import show
 
 
 #Test Method to test Accuracy of Model's Predictions
-def test(dataloader, model_name, codebook_length, device):
+def test(dataloader, model_name, codebook_length, device, is_show):
     model_name = model_name + '.pth'
     with torch.no_grad(): 
         num_testBatches = 20 #How Many Batches to Run Through, Max = 2,000
@@ -62,7 +62,9 @@ def test(dataloader, model_name, codebook_length, device):
                 break
         avg_loss = tot_loss/num_testBatches
         
-        print("Average Loss per Batch: " + str(avg_loss))
-
-        #Calls show function
-        show(original_batches, reconstructed_batches)
+        if is_show:
+            print("Average Loss per Batch: " + str(avg_loss))
+            #Calls show function
+            show(original_batches, reconstructed_batches)
+        else:
+            return avg_loss

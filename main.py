@@ -14,6 +14,7 @@ import sys
 from train import train
 from test import test
 from rate_distortion import rate_distortion
+from rate_distortion import show_rate_distortion
 import os
 torch.cuda.empty_cache()
 
@@ -84,7 +85,9 @@ elif function_run == 'showtrain':
     train(train_loader, model_name, codebook_length, device, model_exist, is_show)
 elif function_run == 'test':
     test(train_loader, model_name, codebook_length, device)
-elif function_run == 'rate-distortion':
+elif function_run == 'train-rate-distortion':
     rate_distortion(train_loader, model_name, codebook_length, device, model_exist)
+elif function_run == 'show-rate-distortion':
+    show_rate_distortion(test_loader, model_name, codebook_length, device, model_exist)
 else:
     print("Unknown Function")

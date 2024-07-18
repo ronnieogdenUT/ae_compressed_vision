@@ -15,6 +15,7 @@ from autoencoder import Autoencoder
 import os
 import sys
 from train import train
+from test import test
 
 def rate_distortion(train_loader, model_name, codebook_length, device, model_exist):
     codebook_vals = [10, 30, 50, 100, 200]
@@ -24,9 +25,15 @@ def rate_distortion(train_loader, model_name, codebook_length, device, model_exi
     first = True
     losses = []
     for codebook_length in codebook_vals:
+        model_name = model_name + str(codebook_length) + '.pth'   
         while (abs(last_loss-curr_loss)/last_loss > 0.01):
             if (first):
-                model_name = model_name + str(codebook_length) + '.pth'
+                files = os.scandir()
+                for file in files:
+                    if (model_name in file.name):
+                        model_exist = True
+                        print("Model Found")
+                        break
                 curr_loss = train(train_loader, model_name, codebook_length, device, model_exist, is_show)
                 last_loss = curr_loss
                 first = False
@@ -37,6 +44,21 @@ def rate_distortion(train_loader, model_name, codebook_length, device, model_exi
             
             curr_loss = train(train_loader, model_name, codebook_length, device, model_exist, is_show)
         losses.append(curr_loss)
+    
+def show_rate_distortion(test_loader, model_name, codebook_length, device, model_exist):
+    codebook_vals = [10, 30, 50, 100, 200]
+    is_show = False
+    losses = []
+    for codebook_length in codebook_vals:
+        model_name = model_name + str(codebook_length) + '.pth'   
+        files = os.scandir()
+        for file in files:
+            if (model_name in file.name):
+                model_exist = True
+                print("Model Found")
+                break
+        loss = test(test_loader, model_name, codebook_length, device, model_exist, is_show) 
+        losses.append(loss)
     plt.plot(codebook_vals, losses)
     plt.xlabel('Iterations')
     plt.ylabel('Loss')
