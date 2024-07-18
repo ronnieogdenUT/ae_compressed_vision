@@ -72,6 +72,8 @@ files = os.scandir()
 for file in files:
     if (model_name in file.name):
         model_exist = True
+        print("Model Found")
+        break
 
     
 if function_run == 'train':
