@@ -71,7 +71,7 @@ def train(dataloader, model_name, codebook_length, device, model_exist, is_show)
     in_channels = 1
     epochs = 20
     losses = []
-    train_batches = 16
+    train_batches = 64
     original_batches = []
     reconstructed_batches = []
     model_name = model_name + '.pth'
