@@ -106,5 +106,3 @@ def train(dataloader, model_name, codebook_length, device, model_exist, is_show,
         plt.ylabel('Loss')
         plt.title('Training Loss')
         plt.show()
-
-    return avg_loss

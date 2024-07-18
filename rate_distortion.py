@@ -17,7 +17,7 @@ import sys
 from train import train
 from test import test
 
-def rate_distortion(train_loader, model_name, codebook_length, device, model_exist):
+def rate_distortion(train_loader, test_loader, model_name, codebook_length, device, model_exist):
     codebook_vals = [10, 30]
     is_show = False
     last_loss = 1000000
@@ -41,7 +41,8 @@ def rate_distortion(train_loader, model_name, codebook_length, device, model_exi
             else:
                 model_exist = True
                 last_loss = curr_loss
-            curr_loss = train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs)
+            train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs)
+            curr_loss = test(test_loader, model_name, codebook_length, device, model_exist, is_show)
     
 def show_rate_distortion(test_loader, model_name, codebook_length, device, model_exist):
     codebook_vals = [10, 30]
