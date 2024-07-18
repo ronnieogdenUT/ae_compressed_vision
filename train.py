@@ -83,14 +83,14 @@ def train(dataloader, model_name, codebook_length, device, model_exist, is_show,
     optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer for model weights
     
     for epoch in range(epochs):
-        print ("Epoch: " + str(epoch+1), end = "")
         if is_show:
+            print ("Epoch: " + str(epoch+1), end = "")
             avg_loss, orig_batch, recon_batch = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is_show)
             original_batches.append(orig_batch)
             reconstructed_batches.append(recon_batch)
+            print ("  |   Average Loss per Batch = " + str(avg_loss))
         else:
             avg_loss = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is_show)
-        print ("  |   Average Loss per Batch = " + str(avg_loss))
         losses.append(avg_loss)
         gc.collect()
         torch.cuda.empty_cache()

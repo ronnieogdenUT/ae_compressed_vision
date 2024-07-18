@@ -42,7 +42,7 @@ def rate_distortion(train_loader, test_loader, model_name, codebook_length, devi
                 model_exist = True
                 last_loss = curr_loss
             train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs)
-            curr_loss = test(test_loader, model_name, codebook_length, device, model_exist, is_show)
+            curr_loss = test(test_loader, model_name, codebook_length, device, is_show)
             print ("Epoch Done. Current Loss: " + curr_loss)
     
 def show_rate_distortion(test_loader, model_name, codebook_length, device, model_exist):
@@ -57,7 +57,7 @@ def show_rate_distortion(test_loader, model_name, codebook_length, device, model
                 model_exist = True
                 print("Model Found")
                 break
-        loss = test(test_loader, model_name, codebook_length, device, model_exist, is_show) 
+        loss = test(test_loader, model_name, codebook_length, device, is_show) 
         losses.append(loss)
     plt.plot(codebook_vals, losses)
     plt.xlabel('Iterations')
