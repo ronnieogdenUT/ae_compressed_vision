@@ -24,7 +24,7 @@ def rate_distortion(train_loader, model_name, codebook_length, device, model_exi
     first = True
     losses = []
     for codebook_length in codebook_vals:
-        while (abs(last_loss-curr_loss)/last_loss < 0.01):
+        while (abs(last_loss-curr_loss)/last_loss > 0.01):
             if (first):
                 model_name = model_name + str(codebook_length) + '.pth'
                 curr_loss = train(train_loader, model_name, codebook_length, device, model_exist, is_show)
