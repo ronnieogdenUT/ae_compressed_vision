@@ -67,6 +67,7 @@ print(f"Using {device} device")
 #Call Main Function
 model_exist = False
 codebook_length = 20
+epochs = 10
 function_run = sys.argv[1]
 model_name = sys.argv[2]
 files = os.scandir()
@@ -79,10 +80,10 @@ for file in files:
     
 if function_run == 'train':
     is_show = False
-    train(train_loader, model_name, codebook_length, device, model_exist, is_show)
+    train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs)
 elif function_run == 'showtrain':
     is_show = True
-    train(train_loader, model_name, codebook_length, device, model_exist, is_show)
+    train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs)
 elif function_run == 'test':
     test(train_loader, model_name, codebook_length, device)
 elif function_run == 'train-rate-distortion':

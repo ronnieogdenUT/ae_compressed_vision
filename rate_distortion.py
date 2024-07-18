@@ -24,6 +24,7 @@ def rate_distortion(train_loader, model_name, codebook_length, device, model_exi
     curr_loss = 5
     first = True
     losses = []
+    epochs = 1
     for codebook_length in codebook_vals:
         print ("Training L = " + str(codebook_length))
         model_name = model_name + str(codebook_length) + '.pth'   
@@ -35,7 +36,7 @@ def rate_distortion(train_loader, model_name, codebook_length, device, model_exi
                         model_exist = True
                         print("Model Found")
                         break
-                curr_loss = train(train_loader, model_name, codebook_length, device, model_exist, is_show)
+                curr_loss = train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs)
                 last_loss = curr_loss
                 first = False
                 continue
@@ -43,7 +44,7 @@ def rate_distortion(train_loader, model_name, codebook_length, device, model_exi
                 model_exist = True
                 last_loss = curr_loss
             
-            curr_loss = train(train_loader, model_name, codebook_length, device, model_exist, is_show)
+            curr_loss = train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs)
         losses.append(curr_loss)
     
 def show_rate_distortion(test_loader, model_name, codebook_length, device, model_exist):
