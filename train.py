@@ -69,7 +69,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
 
 def train(dataloader, model_name, codebook_length, device, model_exist, is_show):
     in_channels = 1
-    epochs = 20
+    epochs = 10
     losses = []
     train_batches = 64
     original_batches = []
