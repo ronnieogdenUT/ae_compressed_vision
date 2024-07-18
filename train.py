@@ -87,7 +87,7 @@ def train(dataloader, model_name, codebook_length, device, model_exist, show):
         print ("Epoch: " + str(epoch+1), end = "")
         if show:
             avg_loss, orig_batch, recon_batch = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, show)
-            original_batches.appned(orig_batch)
+            original_batches.append(orig_batch)
             reconstructed_batches.append(recon_batch)
         else:
             avg_loss = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, show)
