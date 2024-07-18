@@ -43,6 +43,7 @@ def rate_distortion(train_loader, test_loader, model_name, codebook_length, devi
                 last_loss = curr_loss
             train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs)
             curr_loss = test(test_loader, model_name, codebook_length, device, model_exist, is_show)
+            print ("Epoch Done. Current Loss: " + curr_loss)
     
 def show_rate_distortion(test_loader, model_name, codebook_length, device, model_exist):
     codebook_vals = [10, 30]
