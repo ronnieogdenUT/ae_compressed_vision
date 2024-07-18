@@ -29,11 +29,12 @@ def rate_distortion(train_loader, model_name, codebook_length, device, model_exi
                 model_name = model_name + str(codebook_length) + '.pth'
                 curr_loss = train(train_loader, model_name, codebook_length, device, model_exist, is_show)
                 last_loss = curr_loss
+                first = False
                 continue
             else:
                 model_exist = True
                 last_loss = curr_loss
-            first = False
+            
             curr_loss = train(train_loader, model_name, codebook_length, device, model_exist, is_show)
         losses.append(curr_loss)
     plt.plot(codebook_vals, losses)
