@@ -13,6 +13,8 @@ import gc
 import sys
 from train import train
 from test import test
+from rate_distortion import rate_distortion
+import os
 torch.cuda.empty_cache()
 
 #Import MovingMNIST Dataset
@@ -65,12 +67,22 @@ print(f"Using {device} device")
 model_exist = False
 codebook_length = 20
 function_run = sys.argv[1]
-model_name = sys.argv[2] + ".pth"
+model_name = sys.argv[2]
+files = os.scandir()
+for file in files:
+    if (model_name in file.name):
+        model_exist = True
 
     
 if function_run == 'train':
-    train(train_loader, model_name, codebook_length, device, model_exist)
+    show = False
+    train(train_loader, model_name, codebook_length, device, model_exist, show)
+elif function_run == 'showtrain':
+    show = True
+    train(train_loader, model_name, codebook_length, device, model_exist, show)
 elif function_run == 'test':
     test(train_loader, model_name, codebook_length, device)
+elif function_run == 'rate-distortion':
+    rate_distortion(train_loader, model_name, codebook_length, device)
 else:
     print("Unknown Function")

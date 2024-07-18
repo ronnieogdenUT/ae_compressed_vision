@@ -1,4 +1,3 @@
-
 import torch
 from torchvision import datasets
 import matplotlib.pyplot as plt
@@ -14,8 +13,9 @@ import gc
 import autoencoder
 from autoencoder import Autoencoder
 import os
+from show import show
 
-def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches):
+def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, show):
     #Initialize Vars
     tot_loss = 0
     
@@ -36,6 +36,10 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches):
 
         # Output of Autoencoder
         reconstructed = model(batch)
+        
+        if (show and batch_num == 0):
+            original_batch = torch.permute(batch, (0,2,1,3,4))
+            reconstructed_batch = torch.permute(reconstructed, (0,2,1,3,4))
 
         #Calculate Loss
         loss = loss_fn(reconstructed, batch)
@@ -56,15 +60,21 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches):
             reconstructed = None
             loss = None
             avg_loss = tot_loss/train_batches
-            return avg_loss
+            if show:
+                return avg_loss, original_batch, reconstructed_batch
+            else:
+                return avg_loss
             break
 
 
-def train(dataloader, model_name, codebook_length, device, model_exist):
+def train(dataloader, model_name, codebook_length, device, model_exist, show):
     in_channels = 1
     epochs = 5
     losses = []
     train_batches = 16
+    original_batches = []
+    reconstructed_batches = []
+    model_name = model_name + '.pth'
 
     model = Autoencoder(in_channels, codebook_length, device).to(device) #Intialize Model
     if (model_exist == True):
@@ -75,9 +85,13 @@ def train(dataloader, model_name, codebook_length, device, model_exist):
     
     for epoch in range(epochs):
         print ("Epoch: " + str(epoch+1), end = "")
-        avg_loss = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches)
+        if show:
+            avg_loss, orig_batch, recon_batch = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, show)
+            original_batches.appned(orig_batch)
+            reconstructed_batches.append(recon_batch)
+        else:
+            avg_loss = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, show)
         print ("  |   Average Loss per Batch = " + str(avg_loss))
-        print(model.centroids)
         losses.append(avg_loss)
         gc.collect()
         torch.cuda.empty_cache()
@@ -85,11 +99,13 @@ def train(dataloader, model_name, codebook_length, device, model_exist):
     print("Saved Model")
 
     model_exist = True
-    
+    if show:
+        show(original_batches, reconstructed_batches)
+        # Plotting the loss function
+        plt.plot(losses)
+        plt.xlabel('Iterations')
+        plt.ylabel('Loss')
+        plt.title('Training Loss')
+        plt.show()
 
-    # Plotting the loss function
-    plt.plot(losses)
-    plt.xlabel('Iterations')
-    plt.ylabel('Loss')
-    plt.title('Training Loss')
-    plt.show()
+    return avg_loss
