@@ -15,7 +15,7 @@ from autoencoder import Autoencoder
 import os
 from show import show
 
-def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, show):
+def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is_show):
     #Initialize Vars
     tot_loss = 0
     
@@ -37,7 +37,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, sh
         # Output of Autoencoder
         reconstructed = model(batch)
         
-        if (show and batch_num == 0):
+        if (is_show and batch_num == 0):
             original_batch = torch.permute(batch, (0,2,1,3,4))
             reconstructed_batch = torch.permute(reconstructed, (0,2,1,3,4))
 
@@ -60,14 +60,14 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, sh
             reconstructed = None
             loss = None
             avg_loss = tot_loss/train_batches
-            if show:
+            if is_show:
                 return avg_loss, original_batch, reconstructed_batch
             else:
                 return avg_loss
             break
 
 
-def train(dataloader, model_name, codebook_length, device, model_exist, show):
+def train(dataloader, model_name, codebook_length, device, model_exist, is_show):
     in_channels = 1
     epochs = 5
     losses = []
@@ -85,12 +85,12 @@ def train(dataloader, model_name, codebook_length, device, model_exist, show):
     
     for epoch in range(epochs):
         print ("Epoch: " + str(epoch+1), end = "")
-        if show:
-            avg_loss, orig_batch, recon_batch = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, show)
+        if is_show:
+            avg_loss, orig_batch, recon_batch = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is_show)
             original_batches.append(orig_batch)
             reconstructed_batches.append(recon_batch)
         else:
-            avg_loss = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, show)
+            avg_loss = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is_show)
         print ("  |   Average Loss per Batch = " + str(avg_loss))
         losses.append(avg_loss)
         gc.collect()
@@ -99,7 +99,7 @@ def train(dataloader, model_name, codebook_length, device, model_exist, show):
     print("Saved Model")
 
     model_exist = True
-    if show:
+    if is_show:
         show(original_batches, reconstructed_batches)
         # Plotting the loss function
         plt.plot(losses)

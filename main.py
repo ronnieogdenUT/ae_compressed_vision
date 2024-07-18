@@ -77,11 +77,11 @@ for file in files:
 
     
 if function_run == 'train':
-    show = False
-    train(train_loader, model_name, codebook_length, device, model_exist, show)
+    is_show = False
+    train(train_loader, model_name, codebook_length, device, model_exist, is_show)
 elif function_run == 'showtrain':
-    show = True
-    train(train_loader, model_name, codebook_length, device, model_exist, show)
+    is_show = True
+    train(train_loader, model_name, codebook_length, device, model_exist, is_show)
 elif function_run == 'test':
     test(train_loader, model_name, codebook_length, device)
 elif function_run == 'rate-distortion':

@@ -18,7 +18,7 @@ from train import train
 
 def rate_distortion(train_loader, model_name, codebook_length, device, model_exist):
     codebook_vals = [10, 30, 50, 100, 200]
-    show = False
+    is_show = False
     last_loss = sys.maxsize
     curr_loss = 0
     first = True
@@ -31,7 +31,7 @@ def rate_distortion(train_loader, model_name, codebook_length, device, model_exi
                 model_exist = True
                 last_loss = curr_loss
             first = False
-            curr_loss = train(train_loader, model_name, codebook_length, device, model_exist, show)
+            curr_loss = train(train_loader, model_name, codebook_length, device, model_exist, is_show)
         losses.append(curr_loss)
     plt.plot(codebook_vals, losses)
     plt.xlabel('Iterations')
