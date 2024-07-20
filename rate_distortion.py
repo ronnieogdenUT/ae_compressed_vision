@@ -25,6 +25,7 @@ def rate_distortion(train_loader, test_loader, model_name, codebook_length, devi
     first = True
     losses = []
     epochs = 1
+    model_exist = False
     for codebook_length in codebook_vals:
         print ("Training L = " + str(codebook_length))
         model_name = model_name + str(codebook_length) 
@@ -49,6 +50,7 @@ def show_rate_distortion(test_loader, model_name, codebook_length, device):
     codebook_vals = [8, 16, 64, 128, 256, 512, 1024]
     is_show = False
     losses = []
+    model_exist = False
     for codebook_length in codebook_vals:
         model_name = model_name + str(codebook_length)
         files = os.scandir()
