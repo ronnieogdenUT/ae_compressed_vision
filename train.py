@@ -74,10 +74,11 @@ def train(dataloader, model_name, codebook_length, device, model_exist, is_show,
     original_batches = []
     reconstructed_batches = []
     model_name = model_name + '.pth'
+    model_path = os.path.join('models', model_name)
 
     model = Autoencoder(in_channels, codebook_length, device).to(device) #Intialize Model
     if (model_exist == True):
-        model.load_state_dict(torch.load(model_name))
+        model.load_state_dict(torch.load(model_path))
 
     loss_fn = nn.MSELoss() #Intialize Loss Function
     optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer for model weights
@@ -94,7 +95,7 @@ def train(dataloader, model_name, codebook_length, device, model_exist, is_show,
         losses.append(avg_loss)
         gc.collect()
         torch.cuda.empty_cache()
-    torch.save(model.state_dict(), model_name)
+    torch.save(model.state_dict(), model_path)
     print("Saved Model")
 
     model_exist = True

@@ -70,7 +70,7 @@ codebook_length = 20
 epochs = 10
 function_run = sys.argv[1]
 model_name = sys.argv[2]
-files = os.scandir()
+files = os.scandir('models')
 for file in files:
     if (model_name in file.name):
         model_exist = True

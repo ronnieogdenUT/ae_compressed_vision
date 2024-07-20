@@ -13,6 +13,7 @@ import gc
 import autoencoder
 from autoencoder import Autoencoder
 from show import show
+import os
 
 
 #Test Method to test Accuracy of Model's Predictions
@@ -27,10 +28,11 @@ def test(dataloader, model_name, codebook_length, device, is_show):
         tot_loss = 0
         in_channels = 1  # Assuming grayscale video frames
         losses = []
+        model_path = os.path.join('models', model_name)
 
         model = Autoencoder(in_channels, codebook_length, device).to(device) #Intialize Model
 
-        model.load_state_dict(torch.load(model_name))
+        model.load_state_dict(torch.load(model_path))
         
         loss_fn = nn.MSELoss() #Intialize Loss Function
 
