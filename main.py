@@ -70,6 +70,7 @@ codebook_length = 20
 epochs = 10
 function_run = sys.argv[1]
 model_name = sys.argv[2]
+codebook_length = sys.argv[3]
 if not(os.path.exists('models')):
     os.mkdir('models')
 files = os.scandir('models')
