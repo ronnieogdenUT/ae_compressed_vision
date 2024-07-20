@@ -87,7 +87,8 @@ elif function_run == 'showtrain':
     is_show = True
     train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs)
 elif function_run == 'test':
-    test(train_loader, model_name, codebook_length, device)
+    is_show = True
+    test(train_loader, model_name, codebook_length, device, is_show)
 elif function_run == 'train-rate-distortion':
     rate_distortion(train_loader, test_loader, model_name, codebook_length, device)
 elif function_run == 'show-rate-distortion':
