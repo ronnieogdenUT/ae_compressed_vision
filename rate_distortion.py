@@ -39,7 +39,6 @@ def rate_distortion(train_loader, test_loader, model_name, codebook_length, devi
                         print("Model Found")
                         break
                 first = False
-                continue
             else:
                 model_exist = True
                 last_loss = curr_loss
