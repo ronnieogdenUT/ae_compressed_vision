@@ -20,7 +20,7 @@ from test import test
 def rate_distortion(train_loader, test_loader, model_name, codebook_length, device):
     codebook_vals = [8, 16, 64, 128, 256, 512, 1024]
     is_show = False
-    epochs = 1
+    epochs = 3
     for codebook_length in codebook_vals:
         model_exist = False
         first = True
