@@ -27,7 +27,7 @@ def rate_distortion(train_loader, test_loader, model_name, codebook_length, devi
     epochs = 1
     for codebook_length in codebook_vals:
         print ("Training L = " + str(codebook_length))
-        model_name = model_name + str(codebook_length) + '.pth'   
+        model_name = model_name + str(codebook_length) 
         while (abs(last_loss-curr_loss)/last_loss > 0.01):
             if (first):
                 files = os.scandir()
@@ -50,7 +50,7 @@ def show_rate_distortion(test_loader, model_name, codebook_length, device, model
     is_show = False
     losses = []
     for codebook_length in codebook_vals:
-        model_name = model_name + str(codebook_length) + '.pth'   
+        model_name = model_name + str(codebook_length)
         files = os.scandir()
         for file in files:
             if (model_name in file.name):
