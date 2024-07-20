@@ -36,6 +36,9 @@ def test(dataloader, model_name, codebook_length, device, is_show):
         
         loss_fn = nn.MSELoss() #Intialize Loss Function
 
+        #Convert model to eval
+        model.eval()
+
         for (batch_num, batch) in enumerate(dataloader):
             if is_show: print ("Batch: " + str(batch_num+1))
             batch = batch.to(device)
