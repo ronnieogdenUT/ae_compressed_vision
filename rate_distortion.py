@@ -20,13 +20,13 @@ from test import test
 def rate_distortion(train_loader, test_loader, model_name, codebook_length, device):
     codebook_vals = [8, 16, 64, 128, 256, 512, 1024]
     is_show = False
-    last_loss = 1000000
-    curr_loss = 5
     first = True
     losses = []
     epochs = 1
     model_exist = False
     for codebook_length in codebook_vals:
+        last_loss = 1000000
+        curr_loss = 5
         print ("Training L = " + str(codebook_length))
         model_name = model_name + str(codebook_length) 
         while (abs(last_loss-curr_loss)/last_loss > 0.01):
