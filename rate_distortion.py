@@ -32,7 +32,7 @@ def rate_distortion(train_loader, test_loader, model_name, codebook_length, devi
             if (first):
                 files = os.scandir()
                 for file in files:
-                    if (model_name in file.name):
+                    if (model_name == file.name):
                         model_exist = True
                         print("Model Found")
                         break
