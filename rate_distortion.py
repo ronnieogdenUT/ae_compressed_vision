@@ -7,7 +7,7 @@ import datetime
 from datetime import timedelta
 
 def rate_distortion(train_loader, test_loader, model_name, codebook_length, device):
-    codebook_vals = [64, 128, 256, 512, 1024]
+    codebook_vals = [128, 256, 512, 1024]
     is_show = False
     epochs = 1
     for codebook_length in codebook_vals:
