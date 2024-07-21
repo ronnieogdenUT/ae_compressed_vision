@@ -10,7 +10,7 @@ import os
 def test(dataloader, model_name, codebook_length, device, is_show):
     model_name = model_name + '.pth'
     with torch.no_grad(): 
-        num_testBatches = 100 #How Many Batches to Run Through, Max = 2,000
+        num_testBatches = 200 #How Many Batches to Run Through, Max = 2,000
         num_videos_show = 10 #How many Videos to Show at End
         num_every_video = num_testBatches/num_videos_show #Take a batch per # batches
         original_batches = []

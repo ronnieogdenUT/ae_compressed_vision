@@ -61,7 +61,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
 def train(dataloader, model_name, codebook_length, device, model_exist, is_show, epochs):
     in_channels = 1
     losses = []
-    train_batches = 512
+    train_batches = 2048
     original_batches = []
     reconstructed_batches = []
     model_name = model_name + '.pth'
@@ -98,3 +98,5 @@ def train(dataloader, model_name, codebook_length, device, model_exist, is_show,
         plt.ylabel('Loss')
         plt.title('Training Loss')
         plt.show()
+    else:
+        return avg_loss
