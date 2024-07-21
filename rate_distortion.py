@@ -7,7 +7,7 @@ import time
 def rate_distortion(train_loader, test_loader, model_name, codebook_length, device):
     codebook_vals = [16, 64, 128, 256, 512, 1024]
     is_show = False
-    epochs = 3
+    epochs = 1
     for codebook_length in codebook_vals:
         model_exist = False
         first = True
