@@ -34,12 +34,12 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
 
         #Calculate Loss
         loss = loss_fn(reconstructed, batch)
-        int_loss = loss.item()
-        tot_loss = tot_loss + int_loss
+        tot_loss = tot_loss + loss.item()
 
         #Backpropagate
         # The gradients are set to zero, the gradient is computed and stored.
         # .step() performs parameter update
+        os.system("nvidia-smi")
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -47,9 +47,9 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
         #Setting Number of Batches per Epoch
         if ((batch_num  + 1) == train_batches):
             #Cleanup
-            batch = None
-            reconstructed = None
-            loss = None
+            del batch
+            del reconstructed
+            del loss
             avg_loss = tot_loss/train_batches
             if is_show:
                 return avg_loss, original_batch, reconstructed_batch

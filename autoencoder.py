@@ -57,7 +57,7 @@ class resblock_c(torch.nn.Module):
 class Autoencoder(torch.nn.Module):
     def __init__(self, in_channels, codebook_length, device):
         super().__init__()
-        self.tau = 10
+        self.tau = 10**7
         self.device = device
         #z output from encoder as B x D x Channels x L x W
         #Initialize centroids to Lx 16 x 32 x 20 x 8 x 8
@@ -121,7 +121,7 @@ class Autoencoder(torch.nn.Module):
         x = self.decoderConv3(x)
         x = self.decoderBn3(x)
 
-        quantized_x = None
+        del quantized_x
         
         return x
 
@@ -161,6 +161,7 @@ class Autoencoder(torch.nn.Module):
         for i in range(self.codebook_length):
             distance = (abs(x - centroids[i]))
             Qs[i] = torch.exp(-self.tau*distance) * centroids[i]
+            del distance
 
         #Qs = torch.permute(Qs, (1,2,3,4,0,5))
         #print(Qs.shape)
@@ -174,8 +175,6 @@ class Autoencoder(torch.nn.Module):
 
         #Reduced down to the one codebook value
         #Cleanup
-        Qs = None
-        distance = None
-        quantized_shape = None
+        del Qs
 
         return quantized_x
