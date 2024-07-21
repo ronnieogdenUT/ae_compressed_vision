@@ -34,7 +34,7 @@ def rate_distortion(train_loader, test_loader, model_name, codebook_length, devi
             curr_loss = test(test_loader, model_codename, codebook_length, device, is_show)
             print ("Epoch Done. Current Loss: " + str(curr_loss))
             end = time.perf_counter()
-            print("Time Elapsed: " + str(timedelta(seconds = end-start))
+            print("Time Elapsed: " + str(timedelta(seconds = end-start)))
         
     
 def show_rate_distortion(test_loader, model_name, codebook_length, device):
