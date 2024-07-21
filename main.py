@@ -36,7 +36,9 @@ batch_size = 2
 train_loader = torch.utils.data.DataLoader(
     dataset = data,
     batch_size = batch_size, 
-    sampler = train_sampler
+    sampler = train_sampler,
+    num_workers = 4,
+    pin_memory = True
 )
 
 #Initialize Dataloader over test data
