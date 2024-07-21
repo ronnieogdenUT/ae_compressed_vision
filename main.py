@@ -32,7 +32,7 @@ train_sampler = SubsetRandomSampler(train_indices)
 test_sampler = SubsetRandomSampler(test_indices)
 
 #Initialize Dataloader over training data
-batch_size = 16
+batch_size = 8
 train_loader = torch.utils.data.DataLoader(
     dataset = data,
     batch_size = batch_size, 
