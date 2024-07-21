@@ -3,6 +3,8 @@ import os
 from train import train
 from test import test
 import time
+import datetime
+from datetime import timedelta
 
 def rate_distortion(train_loader, test_loader, model_name, codebook_length, device):
     codebook_vals = [16, 64, 128, 256, 512, 1024]
@@ -16,7 +18,7 @@ def rate_distortion(train_loader, test_loader, model_name, codebook_length, devi
         print ("Training L = " + str(codebook_length))
         model_codename = model_name + str(codebook_length) 
         while (abs(last_loss-curr_loss)/last_loss > 0.01):
-            start = time.time()
+            start = time.perf_counter()
             if (first):
                 files = os.scandir('models')
                 for file in files:
@@ -31,8 +33,8 @@ def rate_distortion(train_loader, test_loader, model_name, codebook_length, devi
             train(train_loader, model_codename, codebook_length, device, model_exist, is_show, epochs)
             curr_loss = test(test_loader, model_codename, codebook_length, device, is_show)
             print ("Epoch Done. Current Loss: " + str(curr_loss))
-            end = time.time()
-            print("Time Elapsed: " + str(end-start))
+            end = time.perf_counter()
+            print("Time Elapsed: " + str(timedelta(seconds = end-start))
         
     
 def show_rate_distortion(test_loader, model_name, codebook_length, device):
