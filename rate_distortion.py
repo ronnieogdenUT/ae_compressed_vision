@@ -16,8 +16,9 @@ def rate_distortion(train_loader, test_loader, model_name, codebook_length, devi
         last_loss = 1000000
         curr_loss = 5
         print ("Training L = " + str(codebook_length))
-        model_codename = model_name + str(codebook_length) 
-        while (abs(last_loss-curr_loss)/last_loss > 0.01):
+        model_codename = model_name + str(codebook_length)
+        overfit = False 
+        while (abs(last_loss-curr_loss)/last_loss > 0.01 and overfit == False):
             start = time.perf_counter()
             if (first):
                 files = os.scandir('models')
@@ -32,8 +33,10 @@ def rate_distortion(train_loader, test_loader, model_name, codebook_length, devi
                 last_loss = curr_loss
             train_loss = train(train_loader, model_codename, codebook_length, device, model_exist, is_show, epochs)
             curr_loss = test(test_loader, model_codename, codebook_length, device, is_show)
+            if (curr_loss > last_loss and curr_loss - last_loss > 0.1):
+                overfit = True
             print ("Epoch Done. ", end = "")
-            print("Current Loss: " + str(train_loss))
+            print("Train Loss: " + str(train_loss))
             print("Validation Loss: " + str(curr_loss))
             end = time.perf_counter()
             print("Time Elapsed: " + str(timedelta(seconds = end-start)))
