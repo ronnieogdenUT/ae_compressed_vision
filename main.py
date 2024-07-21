@@ -9,6 +9,8 @@ from rate_distortion import rate_distortion
 from rate_distortion import show_rate_distortion
 import os
 torch.cuda.empty_cache()
+import time
+from datetime import timedelta
 
 #Import MovingMNIST Dataset
 data = datasets.MovingMNIST(
@@ -31,13 +33,29 @@ train_indices, test_indices = indices[split:], indices[:split]
 train_sampler = SubsetRandomSampler(train_indices)
 test_sampler = SubsetRandomSampler(test_indices)
 
-#Initialize Dataloader over training data
-batch_size = 2
-train_loader = torch.utils.data.DataLoader(
-    dataset = data,
-    batch_size = batch_size, 
-    sampler = train_sampler
-)
+for i in range(24):
+    #Initialize Dataloader over training data
+    batch_size = 2
+    train_loader = torch.utils.data.DataLoader(
+        dataset = data,
+        batch_size = batch_size, 
+        sampler = train_sampler,
+        num_workers = i
+    )
+
+    print(str(i) + " Workers: " , end="")
+
+    is_show = False
+    model_name = "workerModel" + str(i) + ".pth"
+    codebook_length = 20
+    device = "cuda"
+    model_exist = False
+    epochs = 1
+    start = time.perf_counter()
+    train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs)
+    end = time.perf_counter()
+    print("Time Elapsed: " + str(timedelta(seconds = end-start)))
+
 
 #Initialize Dataloader over test data
 test_loader = torch.utils.data.DataLoader(
