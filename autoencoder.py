@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as f
 import torch.nn as nn
 import math
+import os
 
 class resblock_a(torch.nn.Module):
     def __init__(self):
@@ -115,6 +116,7 @@ class Autoencoder(torch.nn.Module):
 
         x = self.decoderConv2(x)
         x = self.decoderBn2(x)
+        os.system("nvidia-smi")
         x = f.relu(x)
 
         x = self.decoderConv3(x)
