@@ -30,9 +30,11 @@ def rate_distortion(train_loader, test_loader, model_name, codebook_length, devi
             else:
                 model_exist = True
                 last_loss = curr_loss
-            train(train_loader, model_codename, codebook_length, device, model_exist, is_show, epochs)
+            train_loss = train(train_loader, model_codename, codebook_length, device, model_exist, is_show, epochs)
             curr_loss = test(test_loader, model_codename, codebook_length, device, is_show)
-            print ("Epoch Done. Current Loss: " + str(curr_loss))
+            print ("Epoch Done. ", end = "")
+            print("Current Loss: " + str(train_loss))
+            print("Validation Loss: " + str(curr_loss))
             end = time.perf_counter()
             print("Time Elapsed: " + str(timedelta(seconds = end-start)))
         
