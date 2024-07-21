@@ -116,7 +116,6 @@ class Autoencoder(torch.nn.Module):
 
         x = self.decoderConv2(x)
         x = self.decoderBn2(x)
-        os.system("nvidia-smi")
         x = f.relu(x)
 
         x = self.decoderConv3(x)

@@ -40,6 +40,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
         #Backpropagate
         # The gradients are set to zero, the gradient is computed and stored.
         # .step() performs parameter update
+        os.system("nvidia-smi")
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
