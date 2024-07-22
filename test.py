@@ -7,7 +7,7 @@ import os
 
 
 #Test Method to test Accuracy of Model's Predictions
-def test(dataloader, model_name, codebook_length, device, is_show):
+def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
     model_name = model_name + '.pth'
     with torch.no_grad(): 
         num_testBatches = 200 #How Many Batches to Run Through, Max = 2,000
@@ -20,7 +20,7 @@ def test(dataloader, model_name, codebook_length, device, is_show):
         losses = []
         model_path = os.path.join('models', model_name)
 
-        model = Autoencoder(in_channels, codebook_length, device).to(device) #Intialize Model
+        model = Autoencoder(in_channels, codebook_length, device, batch_size).to(device) #Intialize Model
 
         model.load_state_dict(torch.load(model_path))
         

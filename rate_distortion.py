@@ -6,7 +6,7 @@ import time
 import datetime
 from datetime import timedelta
 
-def rate_distortion(train_loader, test_loader, model_name, codebook_length, device):
+def train_rate_distortion(train_loader, test_loader, model_name, codebook_length, device, batch_size):
     codebook_vals = [128, 256, 512, 1024]
     is_show = False
     epochs = 1
@@ -31,8 +31,8 @@ def rate_distortion(train_loader, test_loader, model_name, codebook_length, devi
             else:
                 model_exist = True
                 last_loss = curr_loss
-            train_loss = train(train_loader, model_codename, codebook_length, device, model_exist, is_show, epochs)
-            curr_loss = test(test_loader, model_codename, codebook_length, device, is_show)
+            train_loss = train(train_loader, model_codename, codebook_length, device, model_exist, is_show, epochs, batch_size)
+            curr_loss = test(test_loader, model_codename, codebook_length, device, is_show, batch_size)
             if (curr_loss > last_loss and curr_loss - last_loss > 0.1):
                 overfit = True
             print ("Epoch Done. ", end = "")
@@ -42,7 +42,7 @@ def rate_distortion(train_loader, test_loader, model_name, codebook_length, devi
             print("Time Elapsed: " + str(timedelta(seconds = end-start)))
         
     
-def show_rate_distortion(test_loader, model_name, codebook_length, device):
+def show_rate_distortion(test_loader, model_name, codebook_length, device, batch_size):
     codebook_vals = [8, 16, 64, 128, 256, 512, 1024]
     is_show = False
     losses = []
@@ -50,7 +50,7 @@ def show_rate_distortion(test_loader, model_name, codebook_length, device):
     for codebook_length in codebook_vals:
         model_codename = model_name + str(codebook_length)
         files = os.scandir('models')
-        loss = test(test_loader, model_codename, codebook_length, device, is_show) 
+        loss = test(test_loader, model_codename, codebook_length, device, is_show, batch_size) 
         losses.append(loss)
     plt.plot(codebook_vals, losses)
     plt.xlabel('Iterations')

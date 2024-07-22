@@ -57,7 +57,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
             break
 
 
-def train(dataloader, model_name, codebook_length, device, model_exist, is_show, epochs):
+def train(dataloader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size):
     in_channels = 1
     losses = []
     train_batches = 2048
@@ -66,7 +66,7 @@ def train(dataloader, model_name, codebook_length, device, model_exist, is_show,
     model_name = model_name + '.pth'
     model_path = os.path.join('models', model_name)
 
-    model = Autoencoder(in_channels, codebook_length, device).to(device) #Intialize Model
+    model = Autoencoder(in_channels, codebook_length, device, batch_size).to(device) #Intialize Model
     if (model_exist == True):
         model.load_state_dict(torch.load(model_path))
 

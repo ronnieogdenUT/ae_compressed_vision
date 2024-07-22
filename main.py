@@ -5,7 +5,7 @@ from torch.utils.data.sampler import SubsetRandomSampler
 import sys
 from train import train
 from test import test
-from rate_distortion import rate_distortion
+from rate_distortion import train_rate_distortion
 from rate_distortion import show_rate_distortion
 import os
 torch.cuda.empty_cache()
@@ -30,23 +30,6 @@ train_indices, test_indices = indices[split:], indices[:split]
 
 train_sampler = SubsetRandomSampler(train_indices)
 test_sampler = SubsetRandomSampler(test_indices)
-
-#Initialize Dataloader over training data
-batch_size = 2
-train_loader = torch.utils.data.DataLoader(
-    dataset = data,
-    batch_size = batch_size, 
-    sampler = train_sampler,
-    num_workers = 4,
-    pin_memory = True
-)
-
-#Initialize Dataloader over test data
-test_loader = torch.utils.data.DataLoader(
-    dataset = data,
-    batch_size = batch_size,
-    sampler = test_sampler
-)
 
 #Check CUDA Availability
 device = (
@@ -73,19 +56,40 @@ for file in files:
         print("Model Found")
         break
 
-    
-if function_run == 'train':
-    is_show = False
-    train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs)
-elif function_run == 'showtrain':
-    is_show = True
-    train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs)
-elif function_run == 'test':
-    is_show = True
-    test(train_loader, model_name, codebook_length, device, is_show)
-elif function_run == 'train-rate-distortion':
-    rate_distortion(train_loader, test_loader, model_name, codebook_length, device)
-elif function_run == 'show-rate-distortion':
-    show_rate_distortion(test_loader, model_name, codebook_length, device)
-else:
-    print("Unknown Function")
+while True:
+        #Initialize Dataloader over training data
+    batch_size = 32
+    train_loader = torch.utils.data.DataLoader(
+        dataset = data,
+        batch_size = batch_size, 
+        sampler = train_sampler,
+        num_workers = 4,
+        pin_memory = True
+    )
+
+    #Initialize Dataloader over test data
+    test_loader = torch.utils.data.DataLoader(
+        dataset = data,
+        batch_size = batch_size,
+        sampler = test_sampler
+    )
+    try:    
+        if function_run == 'train':
+            is_show = False
+            train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
+        elif function_run == 'showtrain':
+            is_show = True
+            train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
+        elif function_run == 'test':
+            is_show = True
+            test(train_loader, model_name, codebook_length, device, is_show, batch_size)
+        elif function_run == 'train-rate-distortion':
+            train_rate_distortion(train_loader, test_loader, model_name, codebook_length, device, batch_size)
+        elif function_run == 'show-rate-distortion':
+            show_rate_distortion(test_loader, model_name, codebook_length, device, batch_size)
+        else:
+            print("Unknown Function")
+    except RuntimeError:
+        batch_size = batch_size/2
+        continue
+    break
