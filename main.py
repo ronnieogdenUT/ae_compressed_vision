@@ -11,6 +11,14 @@ import os
 import gc
 torch.cuda.empty_cache()
 
+print(gc.get_count())
+for obj in gc.get_objects(generation=2):
+    try:
+        if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
+            print(type(obj), obj.size())
+    except:
+        pass
+
 #Import MovingMNIST Dataset
 data = datasets.MovingMNIST(
     root = "./data", 
@@ -57,6 +65,14 @@ for file in files:
         print("Model Found")
         break
 
+print(gc.get_count())
+for obj in gc.get_objects(generation=2):
+    try:
+        if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
+            print(type(obj), obj.size())
+    except:
+        pass
+
 batch_size = 32
 while True:
         #Initialize Dataloader over training data
@@ -100,5 +116,12 @@ while True:
         del train_loader
         del test_loader
         gc.collect()
+        print(gc.get_count())
+    for obj in gc.get_objects(generation=2):
+        try:
+            if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
+                print(type(obj), obj.size())
+        except:
+            pass
         continue
     break
