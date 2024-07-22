@@ -9,6 +9,7 @@ from rate_distortion import train_rate_distortion
 from rate_distortion import show_rate_distortion
 import os
 import gc
+gc.collect()
 torch.cuda.empty_cache()
 
 print("A")
