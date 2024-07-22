@@ -47,23 +47,28 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
             for obj in gc.get_objects():
                 try:
                     if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
-                        print(type(obj), obj.size(), obj.grad_fn.metadata['traceback_'][-1])
-                        print()
+                        print(type(obj), obj.size())
+                        print(obj.grad_fn.metadata['traceback_'][-1])
                 except:
                     pass
 
+            del batch
+            del reconstructed
+            del loss
+            
             #Setting Number of Batches per Epoch
             if ((batch_num  + 1) == train_batches):
                 #Cleanup
-                del batch
-                del reconstructed
-                del loss
                 avg_loss = tot_loss/train_batches
                 if is_show:
                     return avg_loss, original_batch, reconstructed_batch
                 else:
                     return avg_loss
                 break
+            else:
+                if is_show:
+                    del reconstructed_batch
+                    del original_batch
 
 
 def train(dataloader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size):
