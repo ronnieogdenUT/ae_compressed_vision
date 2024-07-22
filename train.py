@@ -17,7 +17,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
     #Iterating Through Dataloader
     for (batch_num, batch) in enumerate(dataloader):
         batch = batch.to(device)
-        #print("Batch: " + str(batch_num + 1))
+        print("Batch: " + str(batch_num + 1))
 
         #Convert Int8 Tensor to NP-usable Float32
         batch = batch.to(torch.float32)
