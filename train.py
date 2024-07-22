@@ -50,7 +50,6 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
         #Setting Number of Batches per Epoch
         if ((batch_num  + 1) == train_batches):
             #Cleanup
-            os.system("nvidia-smi")
             avg_loss = tot_loss/train_batches
             if is_show:
                 return avg_loss, original_batch, reconstructed_batch
