@@ -8,18 +8,7 @@ from test import test
 from rate_distortion import train_rate_distortion
 from rate_distortion import show_rate_distortion
 import os
-import gc
-gc.collect()
 torch.cuda.empty_cache()
-
-print("A")
-print(gc.get_count())
-for obj in gc.get_objects():
-    try:
-        if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
-            print(type(obj), obj.size())
-    except:
-        pass
 
 #Import MovingMNIST Dataset
 data = datasets.MovingMNIST(
@@ -66,14 +55,6 @@ for file in files:
         model_exist = True
         print("Model Found")
         break
-print("B")
-print(gc.get_count())
-for obj in gc.get_objects():
-    try:
-        if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
-            print(type(obj), obj.size())
-    except:
-        pass
 
 batch_size = 32
 while True:
@@ -113,19 +94,9 @@ while True:
         else:
             print("Unknown Function")
     except RuntimeError:
+        print(torch.cuda.memory_summary())
         print("CUDA Out of Memory. Decreasing Batch Size by Half. New Batch Size: " + str(batch_size/2))
         batch_size = int(batch_size/2)
         del train_loader
         del test_loader
-        gc.collect()
-        torch.cuda.empty_cache()
-        print("C")
-        print(gc.get_count())
-        for obj in gc.get_objects():
-            try:
-                if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
-                    print(type(obj), obj.size())
-            except:
-                pass
-            continue
     break
