@@ -8,6 +8,7 @@ from test import test
 from rate_distortion import train_rate_distortion
 from rate_distortion import show_rate_distortion
 import os
+import gc
 torch.cuda.empty_cache()
 
 #Import MovingMNIST Dataset
@@ -98,5 +99,6 @@ while True:
         batch_size = int(batch_size/2)
         del train_loader
         del test_loader
+        gc.collect()
         continue
     break
