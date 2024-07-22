@@ -91,6 +91,6 @@ while True:
             print("Unknown Function")
     except RuntimeError:
         print("CUDA Out of Memory. Decreasing Batch Size by Half. New Batch Size: " + str(batch_size/2))
-        batch_size = batch_size/2
+        batch_size = int(batch_size/2)
         continue
     break
