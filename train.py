@@ -16,65 +16,64 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
 
     #Iterating Through Dataloader
     for (batch_num, batch) in enumerate(dataloader):
-        with torch.autograd.detect_anomaly():
-            batch = batch.to(device)
-            #print("Batch: " + str(batch_num + 1))
+        batch = batch.to(device)
+        #print("Batch: " + str(batch_num + 1))
 
-            #Convert Int8 Tensor to NP-usable Float32
-            batch = batch.to(torch.float32)
+        #Convert Int8 Tensor to NP-usable Float32
+        batch = batch.to(torch.float32)
 
-            #Shift Tensor from size (16,20,1,64,64) to size(16,1,20,64,64)
-            batch = torch.permute(batch, (0,2,1,3,4))
+        #Shift Tensor from size (16,20,1,64,64) to size(16,1,20,64,64)
+        batch = torch.permute(batch, (0,2,1,3,4))
 
-            # Output of Autoencoder
-            reconstructed = model(batch)
-            
-            if (is_show and batch_num == 0):
-                original_batch = torch.permute(batch, (0,2,1,3,4))
-                reconstructed_batch = torch.permute(reconstructed, (0,2,1,3,4))
+        # Output of Autoencoder
+        reconstructed = model(batch)
+        
+        if (is_show and batch_num == 0):
+            original_batch = torch.permute(batch, (0,2,1,3,4))
+            reconstructed_batch = torch.permute(reconstructed, (0,2,1,3,4))
 
-            #Calculate Loss
-            loss = loss_fn(reconstructed, batch)
-            tot_loss = tot_loss + loss.item()
+        #Calculate Loss
+        loss = loss_fn(reconstructed, batch)
+        tot_loss = tot_loss + loss.item()
 
-            #Backpropagate
-            # The gradients are set to zero, the gradient is computed and stored.
-            # .step() performs parameter update
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+        #Backpropagate
+        # The gradients are set to zero, the gradient is computed and stored.
+        # .step() performs parameter update
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
-            for obj in gc.get_objects():
-                try:
-                    if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
-                        print(type(obj), obj.size())
-                        print(obj.grad_fn.metadata['traceback_'][-1])
-                except:
-                    pass
+        # for obj in gc.get_objects():
+        #     try:
+        #         if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
+        #             print(type(obj), obj.size())
+        #     except:
+        #         pass
 
-            del batch
-            del reconstructed
-            del loss
-            
-            #Setting Number of Batches per Epoch
-            if ((batch_num  + 1) == train_batches):
-                #Cleanup
-                avg_loss = tot_loss/train_batches
-                if is_show:
-                    return avg_loss, original_batch, reconstructed_batch
-                else:
-                    return avg_loss
-                break
+        del batch
+        del reconstructed
+        del loss
+        
+        #Setting Number of Batches per Epoch
+        if ((batch_num  + 1) == train_batches):
+            #Cleanup
+            avg_loss = tot_loss/train_batches
+            if is_show:
+                return avg_loss, original_batch, reconstructed_batch
             else:
-                if is_show:
-                    del reconstructed_batch
-                    del original_batch
+                return avg_loss
+            break
+        else:
+            if is_show:
+                del reconstructed_batch
+                del original_batch
+        print(gc.get_count())
 
 
 def train(dataloader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size):
     in_channels = 1
     losses = []
-    train_batches = 1 #int(2000/batch_size)
+    train_batches = 3 #int(2000/batch_size)
     original_batches = []
     reconstructed_batches = []
     model_name = model_name + '.pth'
