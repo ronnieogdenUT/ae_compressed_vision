@@ -43,16 +43,17 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
         loss.backward()
         optimizer.step()
 
+        del batch
+        del reconstructed
+        del loss
+
+        print(gc.get_count())
         for obj in gc.get_objects(generation=2):
             try:
                 if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
                     print(type(obj), obj.size())
             except:
                 pass
-
-        del batch
-        del reconstructed
-        del loss
         
         #Setting Number of Batches per Epoch
         if ((batch_num  + 1) == train_batches):
@@ -63,7 +64,6 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
             else:
                 return avg_loss
             break
-        print(gc.get_count())
 
 
 def train(dataloader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size):
