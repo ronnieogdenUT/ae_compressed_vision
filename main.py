@@ -97,6 +97,5 @@ while True:
         print(torch.cuda.memory_summary())
         print("CUDA Out of Memory. Decreasing Batch Size by Half. New Batch Size: " + str(batch_size/2))
         batch_size = int(batch_size/2)
-        del train_loader
-        del test_loader
+        continue
     break
