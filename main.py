@@ -11,6 +11,7 @@ import os
 import gc
 torch.cuda.empty_cache()
 
+print("A")
 print(gc.get_count())
 for obj in gc.get_objects(generation=2):
     try:
@@ -64,7 +65,7 @@ for file in files:
         model_exist = True
         print("Model Found")
         break
-
+print("B")
 print(gc.get_count())
 for obj in gc.get_objects(generation=2):
     try:
@@ -116,6 +117,7 @@ while True:
         del train_loader
         del test_loader
         gc.collect()
+        print("C")
         print(gc.get_count())
         for obj in gc.get_objects():
             try:
