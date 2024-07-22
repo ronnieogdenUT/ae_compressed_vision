@@ -56,7 +56,7 @@ for file in files:
         print("Model Found")
         break
 
-batch_size = 8
+batch_size = 32
 while True:
         #Initialize Dataloader over training data
     train_loader = torch.utils.data.DataLoader(
