@@ -43,7 +43,7 @@ print(f"Using {device} device")
 
 #Call Main Function
 model_exist = False
-codebook_length = 20
+codebook_length = 10
 epochs = 10
 function_run = sys.argv[1]
 model_name = sys.argv[2]
@@ -56,7 +56,7 @@ for file in files:
         print("Model Found")
         break
 
-batch_size = 4
+batch_size = 8
 while True:
         #Initialize Dataloader over training data
     train_loader = torch.utils.data.DataLoader(
