@@ -14,7 +14,7 @@ torch.cuda.empty_cache()
 
 print("A")
 print(gc.get_count())
-for obj in gc.get_objects(generation=2):
+for obj in gc.get_objects():
     try:
         if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
             print(type(obj), obj.size())
@@ -68,7 +68,7 @@ for file in files:
         break
 print("B")
 print(gc.get_count())
-for obj in gc.get_objects(generation=2):
+for obj in gc.get_objects():
     try:
         if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
             print(type(obj), obj.size())
