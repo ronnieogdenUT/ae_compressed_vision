@@ -7,7 +7,7 @@ import datetime
 from datetime import timedelta
 
 def train_rate_distortion(train_loader, test_loader, model_name, codebook_length, device, batch_size):
-    codebook_vals = [128, 256, 512, 1024]
+    codebook_vals = [8, 16, 64, 128, 256, 512, 1024]
     is_show = False
     epochs = 1
     for codebook_length in codebook_vals:
@@ -17,7 +17,10 @@ def train_rate_distortion(train_loader, test_loader, model_name, codebook_length
         curr_loss = 5
         print ("Training L = " + str(codebook_length))
         model_codename = model_name + str(codebook_length)
-        overfit = False 
+        overfit = False
+        train(train_loader, model_codename, codebook_length, device, model_exist, is_show, epochs, batch_size)
+        train(train_loader, model_codename, codebook_length, device, model_exist, is_show, epochs, batch_size)
+        train(train_loader, model_codename, codebook_length, device, model_exist, is_show, epochs, batch_size)
         while (abs(last_loss-curr_loss)/last_loss > 0.01 and overfit == False):
             start = time.perf_counter()
             if (first):
