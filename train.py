@@ -16,52 +16,54 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
 
     #Iterating Through Dataloader
     for (batch_num, batch) in enumerate(dataloader):
-        batch = batch.to(device)
-        #print("Batch: " + str(batch_num + 1))
+        with torch.autograd.detect_anomaly():
+            batch = batch.to(device)
+            #print("Batch: " + str(batch_num + 1))
 
-        #Convert Int8 Tensor to NP-usable Float32
-        batch = batch.to(torch.float32)
+            #Convert Int8 Tensor to NP-usable Float32
+            batch = batch.to(torch.float32)
 
-        #Shift Tensor from size (16,20,1,64,64) to size(16,1,20,64,64)
-        batch = torch.permute(batch, (0,2,1,3,4))
+            #Shift Tensor from size (16,20,1,64,64) to size(16,1,20,64,64)
+            batch = torch.permute(batch, (0,2,1,3,4))
 
-        # Output of Autoencoder
-        reconstructed = model(batch)
-        
-        if (is_show and batch_num == 0):
-            original_batch = torch.permute(batch, (0,2,1,3,4))
-            reconstructed_batch = torch.permute(reconstructed, (0,2,1,3,4))
+            # Output of Autoencoder
+            reconstructed = model(batch)
+            
+            if (is_show and batch_num == 0):
+                original_batch = torch.permute(batch, (0,2,1,3,4))
+                reconstructed_batch = torch.permute(reconstructed, (0,2,1,3,4))
 
-        #Calculate Loss
-        loss = loss_fn(reconstructed, batch)
-        tot_loss = tot_loss + loss.item()
+            #Calculate Loss
+            loss = loss_fn(reconstructed, batch)
+            tot_loss = tot_loss + loss.item()
 
-        #Backpropagate
-        # The gradients are set to zero, the gradient is computed and stored.
-        # .step() performs parameter update
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+            #Backpropagate
+            # The gradients are set to zero, the gradient is computed and stored.
+            # .step() performs parameter update
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
 
-        for obj in gc.get_objects():
-            try:
-                if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
-                    print(type(obj), obj.size())
-            except:
-                pass
+            for obj in gc.get_objects():
+                try:
+                    if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
+                        print(type(obj), obj.size(), obj.grad_fn.metadata['traceback_'][-1])
+                        print()
+                except:
+                    pass
 
-        #Setting Number of Batches per Epoch
-        if ((batch_num  + 1) == train_batches):
-            #Cleanup
-            del batch
-            del reconstructed
-            del loss
-            avg_loss = tot_loss/train_batches
-            if is_show:
-                return avg_loss, original_batch, reconstructed_batch
-            else:
-                return avg_loss
-            break
+            #Setting Number of Batches per Epoch
+            if ((batch_num  + 1) == train_batches):
+                #Cleanup
+                del batch
+                del reconstructed
+                del loss
+                avg_loss = tot_loss/train_batches
+                if is_show:
+                    return avg_loss, original_batch, reconstructed_batch
+                else:
+                    return avg_loss
+                break
 
 
 def train(dataloader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size):
