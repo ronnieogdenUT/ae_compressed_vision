@@ -73,29 +73,28 @@ while True:
         batch_size = batch_size,
         sampler = test_sampler
     )
-    try:    
-        if function_run == 'train':
-            is_show = False
-            train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
-        elif function_run == 'testTrain':
-            is_show = True
-            epochs = 1
-            train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
-        elif function_run == 'showtrain':
-            is_show = True
-            train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
-        elif function_run == 'test':
-            is_show = True
-            test(train_loader, model_name, codebook_length, device, is_show, batch_size)
-        elif function_run == 'train-rate-distortion':
-            train_rate_distortion(train_loader, test_loader, model_name, codebook_length, device, batch_size)
-        elif function_run == 'show-rate-distortion':
-            show_rate_distortion(test_loader, model_name, codebook_length, device, batch_size)
-        else:
-            print("Unknown Function")
-    except RuntimeError:
-        print(torch.cuda.memory_summary())
-        print("CUDA Out of Memory. Decreasing Batch Size by Half. New Batch Size: " + str(batch_size/2))
-        batch_size = int(batch_size/2)
-        continue
-    break
+    #try:    
+    if function_run == 'train':
+        is_show = False
+        train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
+    elif function_run == 'testTrain':
+        is_show = True
+        epochs = 1
+        train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
+    elif function_run == 'showtrain':
+        is_show = True
+        train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
+    elif function_run == 'test':
+        is_show = True
+        test(train_loader, model_name, codebook_length, device, is_show, batch_size)
+    elif function_run == 'train-rate-distortion':
+        train_rate_distortion(train_loader, test_loader, model_name, codebook_length, device, batch_size)
+    elif function_run == 'show-rate-distortion':
+        show_rate_distortion(test_loader, model_name, codebook_length, device, batch_size)
+    else:
+        print("Unknown Function")
+    # except RuntimeError:
+    #     print("CUDA Out of Memory. Decreasing Batch Size by Half. New Batch Size: " + str(batch_size/2))
+    #     batch_size = int(batch_size/2)
+    #     continue
+    # break
