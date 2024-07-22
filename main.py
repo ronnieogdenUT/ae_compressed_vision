@@ -117,11 +117,11 @@ while True:
         del test_loader
         gc.collect()
         print(gc.get_count())
-    for obj in gc.get_objects(generation=2):
-        try:
-            if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
-                print(type(obj), obj.size())
-        except:
-            pass
-        continue
+        for obj in gc.get_objects():
+            try:
+                if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
+                    print(type(obj), obj.size())
+            except:
+                pass
+            continue
     break
