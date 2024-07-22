@@ -18,8 +18,8 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
     for (batch_num, batch) in enumerate(dataloader):
         batch = batch.to(device)
         #print("Batch: " + str(batch_num + 1))
-        if (batch_num % 10 == 0):
-            print ("Batch: " + str(batch_num))
+        # if (batch_num % 10 == 0):
+        #     print ("Batch: " + str(batch_num))
 
         #Convert Int8 Tensor to NP-usable Float32
         batch = batch.to(torch.float32)
