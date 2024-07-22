@@ -43,12 +43,12 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
         loss.backward()
         optimizer.step()
 
-        # for obj in gc.get_objects():
-        #     try:
-        #         if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
-        #             print(type(obj), obj.size())
-        #     except:
-        #         pass
+        for obj in gc.get_objects(generation=1):
+            try:
+                if torch.is_tensor(obj) or (hasattr(obj, 'data') and torch.is_tensor(obj.data)):
+                    print(type(obj), obj.size())
+            except:
+                pass
 
         del batch
         del reconstructed
