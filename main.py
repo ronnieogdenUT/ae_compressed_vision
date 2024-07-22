@@ -56,9 +56,9 @@ for file in files:
         print("Model Found")
         break
 
+batch_size = 32
 while True:
         #Initialize Dataloader over training data
-    batch_size = 32
     train_loader = torch.utils.data.DataLoader(
         dataset = data,
         batch_size = batch_size, 
@@ -90,6 +90,7 @@ while True:
         else:
             print("Unknown Function")
     except RuntimeError:
+        print("CUDA Out of Memory. Decreasing Batch Size by Half. New Batch Size: " + str(batch_size/2))
         batch_size = batch_size/2
         continue
     break
