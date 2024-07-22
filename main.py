@@ -124,4 +124,5 @@ while True:
             except:
                 pass
             continue
+        torch.cuda.empty_cache()
     break
