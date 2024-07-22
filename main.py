@@ -118,6 +118,7 @@ while True:
         del train_loader
         del test_loader
         gc.collect()
+        torch.cuda.empty_cache()
         print("C")
         print(gc.get_count())
         for obj in gc.get_objects():
@@ -127,5 +128,4 @@ while True:
             except:
                 pass
             continue
-        torch.cuda.empty_cache()
     break
