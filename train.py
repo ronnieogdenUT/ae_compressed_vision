@@ -8,7 +8,7 @@ from show import show
 
 def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is_show):
     #Initialize Vars
-    tot_loss = 0
+    avg_loss = 0
     
 
     #Setting Model Setting to Train
@@ -37,7 +37,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
 
         #Calculate Loss
         loss = loss_fn(reconstructed, batch)
-        tot_loss = tot_loss + loss.item()/train_batches
+        avg_loss = avg_loss + loss.item()/train_batches
 
         #Backpropagate
         # The gradients are set to zero, the gradient is computed and stored.
@@ -52,8 +52,6 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
         
         #Setting Number of Batches per Epoch
         if ((batch_num  + 1) == train_batches):
-            #Cleanup
-            avg_loss = tot_loss/train_batches
             if is_show:
                 return avg_loss, original_batch, reconstructed_batch
             else:

@@ -15,7 +15,7 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
         num_every_video = num_testBatches/num_videos_show #Take a batch per # batches
         original_batches = []
         reconstructed_batches = []
-        tot_loss = 0
+        avg_loss = 0
         in_channels = 1  # Assuming grayscale video frames
         losses = []
         model_path = os.path.join('models', model_name)
@@ -44,7 +44,7 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
 
             #Calculate Loss
             loss = loss_fn(reconstructed, batch).item()
-            tot_loss = tot_loss + loss
+            avg_loss = avg_loss + loss/num_testBatches
 
             #Every "num_videos_show" batches append first vid: originial and reconstructed
             if (batch_num % num_every_video == 0):
@@ -55,7 +55,6 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
             #Setting Number of Batches to Test
             if ((batch_num  + 1) == num_testBatches):
                 break
-        avg_loss = tot_loss/num_testBatches
         
         if is_show:
             print("Average Loss per Batch: " + str(avg_loss))
