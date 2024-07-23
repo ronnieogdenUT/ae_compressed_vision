@@ -8,7 +8,7 @@ from test import test
 from rate_distortion import train_rate_distortion
 from rate_distortion import show_rate_distortion
 import os
-import matplotlib as plt
+import matplotlib.pyplot as plt
 torch.cuda.empty_cache()
 
 #Import MovingMNIST Dataset
