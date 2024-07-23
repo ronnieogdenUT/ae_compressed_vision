@@ -16,6 +16,7 @@ def train_rate_distortion(train_loader, test_loader, model_name, codebook_length
     curr_loss = 5
     print ("Training L = " + str(codebook_length))
     model_codename = model_name + str(codebook_length)
+    last_loss_increase = False
     overfit = False
     #train(train_loader, model_codename, codebook_length, device, model_exist, is_show, epochs, batch_size)
     #print("Initial Training Loop Done")
@@ -34,8 +35,12 @@ def train_rate_distortion(train_loader, test_loader, model_name, codebook_length
             last_loss = curr_loss
         train_loss = train(train_loader, model_codename, codebook_length, device, model_exist, is_show, epochs, batch_size)
         curr_loss = test(test_loader, model_codename, codebook_length, device, is_show, batch_size)
-        if (curr_loss > last_loss and curr_loss - last_loss > 0.1):
+        if (last_loss_increase and curr_loss > last_loss):
             overfit = True
+        if (curr_loss > last_loss):
+            last_loss_increase = True
+        else:
+            last_loss_increase = False
         print ("Epoch Done. ", end = "")
         print("Train Loss: " + str(train_loss))
         print("Validation Loss: " + str(curr_loss))
@@ -47,7 +52,6 @@ def show_rate_distortion(test_loader, model_name, codebook_length, device, batch
     is_show = False
     
     model_codename = model_name + str(codebook_length)
-    print("Model Name: " + model_codename)
     loss = test(test_loader, model_codename, codebook_length, device, is_show, batch_size) 
     return loss
 
