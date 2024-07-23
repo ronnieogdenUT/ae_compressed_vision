@@ -8,6 +8,7 @@ from test import test
 from rate_distortion import train_rate_distortion
 from rate_distortion import show_rate_distortion
 import os
+import matplotlib as plt
 torch.cuda.empty_cache()
 
 #Import MovingMNIST Dataset
@@ -90,12 +91,23 @@ while True:
             test(train_loader, model_name, codebook_length, device, is_show, batch_size)
         elif function_run == 'train-rate-distortion':
             codebook_vals = [8, 16, 64, 128, 256, 512, 1024]
-            train_rate_distortion(data, train_sampler, test_sampler, model_name, codebook_vals[curr_ind], device, batch_size)
+            train_rate_distortion(train_loader, test_loader, model_name, codebook_vals[curr_ind], device, batch_size)
             if (curr_ind + 1 != len(codebook_vals)): 
                 curr_ind += 1
                 continue
         elif function_run == 'show-rate-distortion':
-            show_rate_distortion(test_loader, model_name, codebook_length, device, batch_size)
+            codebook_vals = [8, 16, 64, 128, 256, 512, 1024]
+            losses = []
+            loss = show_rate_distortion(test_loader, model_name, codebook_length, device, batch_size)
+            losses.apend(loss)
+            if (curr_ind + 1 != len(codebook_vals)): 
+                curr_ind += 1
+                continue
+            plt.plot(codebook_vals, losses)
+            plt.xlabel('Iterations')
+            plt.ylabel('Loss')
+            plt.title('Training Loss')
+            plt.show()
         else:
             print("Unknown Function")
     except RuntimeError:

@@ -44,17 +44,10 @@ def train_rate_distortion(train_loader, test_loader, model_name, codebook_length
         
     
 def show_rate_distortion(test_loader, model_name, codebook_length, device, batch_size):
-    codebook_vals = [8, 16, 64, 128, 256, 512, 1024]
     is_show = False
-    losses = []
-    model_exist = False
-    for codebook_length in codebook_vals:
-        model_codename = model_name + str(codebook_length)
-        files = os.scandir('models')
-        loss = test(test_loader, model_codename, codebook_length, device, is_show, batch_size) 
-        losses.append(loss)
-    plt.plot(codebook_vals, losses)
-    plt.xlabel('Iterations')
-    plt.ylabel('Loss')
-    plt.title('Training Loss')
-    plt.show()
+    
+    model_codename = model_name + str(codebook_length)
+    loss = test(test_loader, model_codename, codebook_length, device, is_show, batch_size) 
+    return loss
+
+
