@@ -37,7 +37,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
 
         #Calculate Loss
         loss = loss_fn(reconstructed, batch)
-        avg_loss = avg_loss + loss.item()/train_batches
+        avg_loss += loss.item()/train_batches
 
         #Backpropagate
         # The gradients are set to zero, the gradient is computed and stored.
@@ -45,16 +45,13 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-
-        del batch
-        del reconstructed
-        del loss
         
         #Setting Number of Batches per Epoch
         if ((batch_num  + 1) == train_batches):
             if is_show:
                 return avg_loss, original_batch, reconstructed_batch
             else:
+                print(avg_loss)
                 return avg_loss
             break
 
