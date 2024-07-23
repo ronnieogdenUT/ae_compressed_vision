@@ -105,9 +105,9 @@ while True:
                 continue
             else:
                 plt.plot(codebook_vals, losses)
-                plt.xlabel('Iterations')
+                plt.xlabel('Codebook Values')
                 plt.ylabel('Loss')
-                plt.title('Training Loss')
+                plt.title('Rate-Distortion')
                 plt.show()
         else:
             print("Unknown Function")
