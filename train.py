@@ -37,7 +37,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
 
         #Calculate Loss
         loss = loss_fn(reconstructed, batch)
-        tot_loss = tot_loss + loss.item()
+        tot_loss = tot_loss + loss.item()/train_batches
 
         #Backpropagate
         # The gradients are set to zero, the gradient is computed and stored.
