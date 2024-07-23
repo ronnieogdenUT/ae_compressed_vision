@@ -57,6 +57,7 @@ for file in files:
         break
 
 batch_size = 32
+curr_ind = 0
 while True:
         #Initialize Dataloader over training data
     train_loader = torch.utils.data.DataLoader(
@@ -88,7 +89,11 @@ while True:
             is_show = True
             test(train_loader, model_name, codebook_length, device, is_show, batch_size)
         elif function_run == 'train-rate-distortion':
-            train_rate_distortion(train_loader, test_loader, model_name, codebook_length, device, batch_size)
+            codebook_vals = [8, 16, 64, 128, 256, 512, 1024]
+            train_rate_distortion(data, train_sampler, test_sampler, model_name, codebook_vals[curr_ind], device, batch_size)
+            if (curr_ind + 1 != len(codebook_vals)): 
+                curr_ind += 1
+                continue
         elif function_run == 'show-rate-distortion':
             show_rate_distortion(test_loader, model_name, codebook_length, device, batch_size)
         else:
