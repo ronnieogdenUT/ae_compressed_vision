@@ -51,7 +51,6 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
             if is_show:
                 return avg_loss, original_batch, reconstructed_batch
             else:
-                print(avg_loss)
                 return avg_loss
             break
 
