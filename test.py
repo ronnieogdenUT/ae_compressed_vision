@@ -44,7 +44,7 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
 
             #Calculate Loss
             loss = loss_fn(reconstructed, batch).item()
-            if (batch_num % 50 == 0): print("Loss: " + loss)
+            if (batch_num % 50 == 0): print("Loss: " + str(loss))
             avg_loss = avg_loss + loss/num_testBatches
 
             #Every "num_videos_show" batches append first vid: originial and reconstructed
