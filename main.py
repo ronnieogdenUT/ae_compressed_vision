@@ -100,6 +100,7 @@ while True:
             losses = []
             loss = 0 #show_rate_distortion(test_loader, model_name, codebook_vals[curr_ind], device, batch_size)
             #losses.append(loss)
+            print(len(codebook_vals))
             if (curr_ind + 1 != len(codebook_vals)): 
                 curr_ind += 1
                 continue
