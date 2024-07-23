@@ -98,11 +98,8 @@ while True:
                 continue
         elif function_run == 'show-rate-distortion':
             codebook_vals = [8, 16, 64, 128, 256, 512]
-            loss = 0 #show_rate_distortion(test_loader, model_name, codebook_vals[curr_ind], device, batch_size)
+            loss = show_rate_distortion(test_loader, model_name, codebook_vals[curr_ind], device, batch_size)
             losses.append(loss)
-            print(losses)
-            print(len(codebook_vals))
-            print("Current Index: " + str(curr_ind))
             if (curr_ind + 1 != len(codebook_vals)): 
                 curr_ind += 1
                 continue
