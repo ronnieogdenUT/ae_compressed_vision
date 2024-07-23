@@ -47,7 +47,7 @@ def show_rate_distortion(test_loader, model_name, codebook_length, device, batch
     is_show = False
     
     model_codename = model_name + str(codebook_length)
-    print("Model Name: " + model_name)
+    print("Model Name: " + model_codename)
     loss = test(test_loader, model_codename, codebook_length, device, is_show, batch_size) 
     return loss
 
