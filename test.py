@@ -7,8 +7,8 @@ import numpy as np
 import torch.nn as nn
 import matplotlib.animation as animation
 import math
-#from pytorch_msssim import ms_ssim
 from torch.utils.data.sampler import SubsetRandomSampler
+#from pytorch_msssim import ms_ssim
 import gc
 import time
 import autoencoder
@@ -32,6 +32,7 @@ def test(dataloader, model_name, codebook_length, device):
         model.load_state_dict(torch.load(model_name))
         
         loss_fn = nn.MSELoss() #Intialize Loss Function
+        # loss_fn = ms_ssim  # Initialize Loss Function
 
         for (batch_num, batch) in enumerate(dataloader):
             print ("Batch: " + str(batch_num))
@@ -49,6 +50,8 @@ def test(dataloader, model_name, codebook_length, device):
             video_end_time = time.perf_counter()
             
             #Calculate Loss
+            # loss = 1 - ms_ssim(reconstructed, batch, data_range=1.0, size_average=True).item()
+            # tot_loss = tot_loss + loss
             loss = loss_fn(reconstructed, batch).item()
             tot_loss = tot_loss + loss
             

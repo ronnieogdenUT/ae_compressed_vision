@@ -8,8 +8,8 @@ import numpy as np
 import torch.nn as nn
 import matplotlib.animation as animation
 import math
-#from pytorch_msssim import ms_ssim
 from torch.utils.data.sampler import SubsetRandomSampler
+#from pytorch_msssim import ms_ssim
 import gc
 import autoencoder
 from autoencoder import Autoencoder
@@ -38,6 +38,9 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches):
         reconstructed = model(batch)
 
         #Calculate Loss
+        # loss = 1 - ms_ssim(reconstructed, batch, data_range=1.0, size_average=True)
+        # int_loss = loss.item()
+        # tot_loss = tot_loss + int_loss
         loss = loss_fn(reconstructed, batch)
         int_loss = loss.item()
         tot_loss = tot_loss + int_loss
@@ -67,6 +70,7 @@ def train(dataloader, model_name, codebook_length, device, model_exist):
         model.load_state_dict(torch.load(model_name))
 
     loss_fn = nn.MSELoss() #Intialize Loss Function
+    # loss_fn = ms_ssim  # Initialize Loss Function
     optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer for model weights
     
     for epoch in range(epochs):
