@@ -59,6 +59,7 @@ for file in files:
 
 batch_size = 32
 curr_ind = 0
+losses = []
 while True:
         #Initialize Dataloader over training data
     train_loader = torch.utils.data.DataLoader(
@@ -97,7 +98,6 @@ while True:
                 continue
         elif function_run == 'show-rate-distortion':
             codebook_vals = [8, 16, 64, 128, 256, 512]
-            losses = []
             loss = 0 #show_rate_distortion(test_loader, model_name, codebook_vals[curr_ind], device, batch_size)
             losses.append(loss)
             print(losses)
