@@ -39,7 +39,7 @@ model.eval()
 i=0
 while True:
     #GET 2 FRAMES(2 x 1 x 64 x 64)
-    frameSet = video[i:i+1]
+    frameSet = video[i:i+2]
     print(frameSet.shape)
     frameSet.to(device)
     start = time.perf_counter()
