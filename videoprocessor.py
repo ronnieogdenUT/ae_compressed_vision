@@ -6,6 +6,7 @@ from show import show
 from torchvision import datasets
 import time
 from datetime import timedelta
+import os
 
 #Import MovingMNIST Dataset
 data = datasets.MovingMNIST(
@@ -36,7 +37,8 @@ device = (
 print(f"Using {device} device")
 
 #Create and IMPORT MODEL
-model_path = "model128.pth"
+model_name = "model128.pth"
+model_path = os.path.join('models', model_name)
 model = Autoencoder(in_channels, codebook_length, device, batch_size).to(device) #Intialize Model
 model.load_state_dict(torch.load(model_path))
 model.eval()
