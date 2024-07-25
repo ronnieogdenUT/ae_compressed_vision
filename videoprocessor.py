@@ -45,7 +45,8 @@ model.eval()
 
 while True:
     #GET 2 FRAMES(2 x 1 x 64 x 64)
-    frameSet = video[0,1]
+    frameSet = video[0,2]
+    print(frameSet.shape)
     frameSet.to(device)
     start = time.perf_counter()
     reconstructed = model(frameSet)
