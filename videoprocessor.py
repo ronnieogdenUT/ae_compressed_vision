@@ -14,7 +14,7 @@ data = datasets.MovingMNIST(
     download = True
 )
 
-video = data[0] # 20 frames
+video = torch.squeeze(data[0]) # 20 frames
 batch_size = 2
 
 train_loader = torch.utils.data.DataLoader(
@@ -42,13 +42,14 @@ model_path = os.path.join('models', model_name)
 model = Autoencoder(in_channels, codebook_length, device, batch_size).to(device) #Intialize Model
 model.load_state_dict(torch.load(model_path))
 model.eval()
-
+i=0
 while True:
     #GET 2 FRAMES(2 x 1 x 64 x 64)
-    frameSet = video[0,2]
+    frameSet = video[i,i+1]
     print(frameSet.shape)
     frameSet.to(device)
     start = time.perf_counter()
     reconstructed = model(frameSet)
     end = time.perf_counter()
     print("Time Elapsed: " + str(timedelta(seconds = end-start)))
+    i += 2
