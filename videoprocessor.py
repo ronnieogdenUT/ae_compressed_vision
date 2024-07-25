@@ -43,6 +43,7 @@ model.eval()
 i=0
 for video in train_loader:
     while True:
+        print(frameSet.shape)
         #Input 1 x Frames x C x L x W
         frameSet = torch.permute(video, (1,0,2,3,4)) #Change to Frames x 1 x C x L x W
         frameSet = video[i:i+2] #Cut it to 2 x 1 x C x L x W
