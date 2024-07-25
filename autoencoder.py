@@ -155,7 +155,6 @@ class Autoencoder(torch.nn.Module):
             output = (pad_left, pad_right, pad_top, pad_bottom, pad_forward, pad_backward)
             return output
         else: #Video(Batch of Frames): Batch x Channel x Length x Width
-            print(x.shape)
             in_height = size[3]
             in_width = size[2]
             filter_height = kernel
@@ -176,7 +175,7 @@ class Autoencoder(torch.nn.Module):
     
     def quantize(self, x):
         centroids = self.centroids
-        quantized_shape = (self.codebook_length, self.batch_size, 32, 20, 8, 8)
+        quantized_shape = (self.codebook_length, x.shape)
 
         Qs = torch.ones(quantized_shape, device = self.device)
         #print(Qs.shape)
