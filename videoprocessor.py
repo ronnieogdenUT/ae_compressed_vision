@@ -44,14 +44,10 @@ model.load_state_dict(torch.load(model_path))
 model.eval()
 
 while True:
-    try:
-        print("Start")
-        #GET 2 FRAMES(2 x 1 x 64 x 64)
-        frameSet = video[0,1]
-        frameSet.to(device)
-        start = time.perf_counter()
-        reconstructed = model(frameSet)
-        end = time.perf_counter()
-        print("Time Elapsed: " + str(timedelta(seconds = end-start)))
-    except:
-        break
+    #GET 2 FRAMES(2 x 1 x 64 x 64)
+    frameSet = video[0,1]
+    frameSet.to(device)
+    start = time.perf_counter()
+    reconstructed = model(frameSet)
+    end = time.perf_counter()
+    print("Time Elapsed: " + str(timedelta(seconds = end-start)))
