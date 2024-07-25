@@ -13,8 +13,9 @@ data = datasets.MovingMNIST(
     root = "./data", 
     download = True
 )
-
-video = torch.squeeze(data[0], dim=0) # 20 frames
+# 10,000 x 20 x 1 x 64 x 64
+video = data[0] # 1 x 20 x 1 x 64 x 64
+video = torch.permute(video, (1,0,1,2,3,4)) #Frames x B x C x L x W
 batch_size = 2
 
 in_channels = 1
@@ -37,8 +38,9 @@ model.load_state_dict(torch.load(model_path))
 model.eval()
 i=0
 while True:
-    #GET 2 FRAMES(2 x 1 x 64 x 64)
+    #GET 2 FRAMES(2 x B x C x 64 x 64)
     frameSet = video[i:i+2]
+    frameSet = torch.permute(video, (1,2,0,3,4)) #Permute it to B x C x 2 x 64 x 64
     frameSet.to(device)
     frameSet = frameSet.to(torch.float32)
     start = time.perf_counter()
