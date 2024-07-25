@@ -3,7 +3,6 @@ import os
 from train import train
 from test import test
 import time
-import datetime
 from datetime import timedelta
 
 def train_rate_distortion(train_loader, test_loader, model_name, codebook_length, device, batch_size):
