@@ -13,7 +13,6 @@ data = datasets.MovingMNIST(
     root = "./data", 
     download = True
 )
-print("Data Shape: " + str(data.shape))
 
 video = torch.squeeze(data[0]) # 20 frames
 batch_size = 2
