@@ -13,16 +13,11 @@ data = datasets.MovingMNIST(
     root = "./data", 
     download = True
 )
+print("Data Shape: " + str(data.shape))
 
 video = torch.squeeze(data[0]) # 20 frames
 batch_size = 2
-
-train_loader = torch.utils.data.DataLoader(
-        dataset = data,
-        batch_size = batch_size, 
-        num_workers = 4,
-        pin_memory = True
-    )
+print("Video Shape: " + str(video.shape))
 
 in_channels = 1
 codebook_length = 128
