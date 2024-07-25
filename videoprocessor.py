@@ -16,7 +16,6 @@ data = datasets.MovingMNIST(
 
 video = torch.squeeze(data[0], dim=0) # 20 frames
 batch_size = 2
-print("Video Shape: " + str(video.shape))
 
 in_channels = 1
 codebook_length = 128
@@ -40,8 +39,8 @@ i=0
 while True:
     #GET 2 FRAMES(2 x 1 x 64 x 64)
     frameSet = video[i:i+2]
-    print(frameSet.shape)
     frameSet.to(device)
+    frameSet = frameSet.to(torch.float32)
     start = time.perf_counter()
     reconstructed = model(frameSet)
     end = time.perf_counter()
