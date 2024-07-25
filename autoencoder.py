@@ -130,28 +130,48 @@ class Autoencoder(torch.nn.Module):
     #Calculates Padding(Mimics Tensor Flow padding = 'same')
     def same_pad(self, x, stride, kernel):
         size = x.size()
-        in_height = size[4]
-        in_width = size[3]
-        filter_height = kernel
-        filter_width = kernel
 
-        out_height = math.ceil(float(in_height) / float(stride[1]))
-        out_width  = math.ceil(float(in_width) / float(stride[2]))
+        if len(size) == 5: #Batch of Videos: Batch x Channel x Time x Length x Width
+            in_height = size[4]
+            in_width = size[3]
+            filter_height = kernel
+            filter_width = kernel
 
-        #3D Padding: Time Dimension, Front, Back
-        pad_forward = (kernel-1)//2
-        pad_backward = (kernel-1)//2
+            out_height = math.ceil(float(in_height) / float(stride[1]))
+            out_width  = math.ceil(float(in_width) / float(stride[2]))
 
-        
-        #Regular 2D Padding: Top, Bottom, Left, Right
-        pad_along_height = max((out_height - 1) * stride[1] + filter_height - in_height, 0)
-        pad_along_width = max((out_width - 1) * stride[2] + filter_width - in_width, 0)
-        pad_top = pad_along_height // 2
-        pad_bottom = pad_along_height - pad_top
-        pad_left = pad_along_width // 2
-        pad_right = pad_along_width - pad_left
-        output = (pad_left, pad_right, pad_top, pad_bottom, pad_forward, pad_backward)
-        return output
+            #3D Padding: Time Dimension, Front, Back
+            pad_forward = (kernel-1)//2
+            pad_backward = (kernel-1)//2
+
+            
+            #Regular 2D Padding: Top, Bottom, Left, Right
+            pad_along_height = max((out_height - 1) * stride[1] + filter_height - in_height, 0)
+            pad_along_width = max((out_width - 1) * stride[2] + filter_width - in_width, 0)
+            pad_top = pad_along_height // 2
+            pad_bottom = pad_along_height - pad_top
+            pad_left = pad_along_width // 2
+            pad_right = pad_along_width - pad_left
+            output = (pad_left, pad_right, pad_top, pad_bottom, pad_forward, pad_backward)
+            return output
+        else: #Video(Batch of Frames): Batch x Channel x Length x Width
+            in_height = size[3]
+            in_width = size[2]
+            filter_height = kernel
+            filter_width = kernel
+
+            out_height = math.ceil(float(in_height) / float(stride[1]))
+            out_width  = math.ceil(float(in_width) / float(stride[2]))
+            
+            #Regular 2D Padding: Top, Bottom, Left, Right
+            pad_along_height = max((out_height - 1) * stride[1] + filter_height - in_height, 0)
+            pad_along_width = max((out_width - 1) * stride[2] + filter_width - in_width, 0)
+            pad_top = pad_along_height // 2
+            pad_bottom = pad_along_height - pad_top
+            pad_left = pad_along_width // 2
+            pad_right = pad_along_width - pad_left
+            output = (pad_left, pad_right, pad_top, pad_bottom)
+            return output
     
     def quantize(self, x):
         centroids = self.centroids
