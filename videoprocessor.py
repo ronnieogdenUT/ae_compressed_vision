@@ -14,7 +14,7 @@ data = datasets.MovingMNIST(
     download = True
 )
 
-video = torch.squeeze(data[0]) # 20 frames
+video = torch.squeeze(data[0], dim=0) # 20 frames
 batch_size = 2
 print("Video Shape: " + str(video.shape))
 
