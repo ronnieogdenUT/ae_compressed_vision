@@ -14,10 +14,13 @@ data = datasets.MovingMNIST(
     download = True
 )
 # 10,000 x 20 x 1 x 64 x 64
-video = torch.utils.data.Subset(data, [0]) # 1 x 20 x 1 x 64 x 64
-video = torch.permute(video, (1,0,2,3,4)) #Frames x B x C x L x W
-print (video.shape)
-batch_size = 2
+batch_size = 1
+train_loader = torch.utils.data.DataLoader(
+        dataset = data,
+        batch_size = batch_size, 
+        num_workers = 4,
+        pin_memory = True
+    )
 
 in_channels = 1
 codebook_length = 128
@@ -38,14 +41,16 @@ model = Autoencoder(in_channels, codebook_length, device, batch_size).to(device)
 model.load_state_dict(torch.load(model_path))
 model.eval()
 i=0
-while True:
-    #GET 2 FRAMES(2 x B x C x 64 x 64)
-    frameSet = video[i:i+2]
-    frameSet = torch.permute(video, (1,2,0,3,4)) #Permute it to B x C x 2 x 64 x 64
-    frameSet.to(device)
-    frameSet = frameSet.to(torch.float32)
-    start = time.perf_counter()
-    reconstructed = model(frameSet)
-    end = time.perf_counter()
-    print("Time Elapsed: " + str(timedelta(seconds = end-start)))
-    i += 2
+for video in train_loader:
+    while True:
+        #Input 1 x Frames x C x L x W
+        frameSet = torch.permute(video, (1,0,2,3,4)) #Change to Frames x 1 x C x L x W
+        frameSet = video[i:i+2] #Cut it to 2 x 1 x C x L x W
+        frameSet = torch.permute(video, (1,2,0,3,4)) #Permute it to B x C x 2 x 64 x 64
+        frameSet.to(device)
+        frameSet = frameSet.to(torch.float32)
+        start = time.perf_counter()
+        reconstructed = model(frameSet)
+        end = time.perf_counter()
+        print("Time Elapsed: " + str(timedelta(seconds = end-start)))
+        i += 2
