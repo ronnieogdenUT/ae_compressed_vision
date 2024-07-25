@@ -155,7 +155,7 @@ class Autoencoder(torch.nn.Module):
             output = (pad_left, pad_right, pad_top, pad_bottom, pad_forward, pad_backward)
             return output
         else: #Video(Batch of Frames): Batch x Channel x Length x Width
-            print(size)
+            print(x.shape)
             in_height = size[3]
             in_width = size[2]
             filter_height = kernel
