@@ -45,6 +45,7 @@ model.eval()
 
 while True:
     try:
+        print("Start")
         #GET 2 FRAMES(2 x 1 x 64 x 64)
         frameSet = video[0,1]
         frameSet.to(device)
