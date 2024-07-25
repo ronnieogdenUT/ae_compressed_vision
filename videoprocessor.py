@@ -15,7 +15,7 @@ data = datasets.MovingMNIST(
 )
 # 10,000 x 20 x 1 x 64 x 64
 video = torch.utils.data.Subset(data, [0]) # 1 x 20 x 1 x 64 x 64
-video = torch.permute(video[0], (1,0,2,3,4)) #Frames x B x C x L x W
+video = torch.permute(video, (1,0,2,3,4)) #Frames x B x C x L x W
 print (video.shape)
 batch_size = 2
 
