@@ -66,7 +66,6 @@ model_exist = True
 codebook_length = 20
 function_run = sys.argv[1]
 model_name = sys.argv[2] + ".pth"
-torch.load('pytorch.pt', map_location=torch.device('cpu'))
 
     
 if function_run == 'train':
