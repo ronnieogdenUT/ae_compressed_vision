@@ -57,7 +57,7 @@ for file in files:
         print("Model Found")
         break
 
-batch_size = 32
+batch_size = 16
 curr_ind = 0
 losses = []
 while True:
