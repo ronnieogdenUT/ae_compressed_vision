@@ -57,7 +57,7 @@ class resblock_c(torch.nn.Module):
 class Autoencoder(torch.nn.Module):
     def __init__(self, in_channels, codebook_length, device, batch_size):
         super().__init__()
-        self.tau = 10
+        self.tau = 10^7
         self.device = device
         self.batch_size = batch_size
         #z output from encoder as B x D x Channels x L x W
@@ -125,7 +125,10 @@ class Autoencoder(torch.nn.Module):
         del quantized_x
         
         return x
-
+    
+    def set_tau(self, tau):
+        self.tau = tau
+        print(self.tau)
 
     #Calculates Padding(Mimics Tensor Flow padding = 'same')
     def same_pad(self, x, stride, kernel):
