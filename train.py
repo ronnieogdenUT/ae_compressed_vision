@@ -28,7 +28,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
         #Shift Tensor from size (16,20,1,64,64) to size(16,1,20,64,64)
         batch = torch.permute(batch, (0,2,1,3,4))
 
-        model.set_tau(10^7)
+        model.set_tau(10**7)
         # Output of Autoencoder
         reconstructed = model(batch)
         
