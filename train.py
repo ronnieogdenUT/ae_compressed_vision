@@ -44,7 +44,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
         # The gradients are set to zero, the gradient is computed and stored.
         # .step() performs parameter update
         optimizer.zero_grad()
-        model.set_tau(10)
+        model.set_tau(1)
         loss.backward()
         optimizer.step()
         
