@@ -69,7 +69,7 @@ def train(dataloader, model_name, codebook_length, device, model_exist, is_show,
         model.load_state_dict(torch.load(model_path))
 
     loss_fn = nn.MSELoss() #Intialize Loss Function
-    optimizer = torch.optim.Adam(model.parameters(), lr = 0.002, betas=(0.9,0.999)) #Intialize Adam Optimizer for model weights
+    optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer for model weights
     
     for epoch in range(epochs):
         if is_show:
