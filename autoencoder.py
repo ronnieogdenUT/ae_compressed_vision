@@ -128,7 +128,6 @@ class Autoencoder(torch.nn.Module):
     
     def set_tau(self, tau):
         self.tau = tau
-        print(self.tau)
 
     #Calculates Padding(Mimics Tensor Flow padding = 'same')
     def same_pad(self, x, stride, kernel):
