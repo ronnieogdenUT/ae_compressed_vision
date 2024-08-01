@@ -12,7 +12,6 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
     
 
     #Setting Model Setting to Train
-    model.train()
 
     #Iterating Through Dataloader
     for (batch_num, batch) in enumerate(dataloader):
@@ -60,7 +59,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
 def train(dataloader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size):
     in_channels = 1
     losses = []
-    train_batches = int(8000/batch_size)
+    train_batches = int(1000/batch_size)
     original_batches = []
     reconstructed_batches = []
     model_name = model_name + '.pth'
@@ -72,6 +71,8 @@ def train(dataloader, model_name, codebook_length, device, model_exist, is_show,
 
     loss_fn = nn.MSELoss() #Intialize Loss Function
     optimizer = torch.optim.Adam(model.parameters(), lr = 0.01, betas=(0.9,0.999)) #Intialize Adam Optimizer for model weights
+
+    model.train()
     
     for epoch in range(epochs):
         if is_show:

@@ -9,8 +9,9 @@ import os
 #Test Method to test Accuracy of Model's Predictions
 def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
     model_name = model_name + '.pth'
+    model.eval()
     with torch.no_grad(): 
-        num_testBatches = int(2000/batch_size) #How Many Batches to Run Through, Max = 2,000
+        num_testBatches = int(100/batch_size) #How Many Batches to Run Through, Max = 2,000
         num_videos_show = 10 #How many Videos to Show at End
         num_every_video = num_testBatches/num_videos_show #Take a batch per # batches
         original_batches = []
@@ -48,7 +49,6 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
 
             #Every "num_videos_show" batches append first vid: originial and reconstructed
             if (batch_num % num_every_video == 0):
-                print("Added")
                 original_batches.append(torch.permute(batch, (0,2,1,3,4)))
                 reconstructed_batches.append(torch.permute(reconstructed, (0,2,1,3,4)))
 
