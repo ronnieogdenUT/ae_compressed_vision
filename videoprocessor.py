@@ -12,7 +12,7 @@ import torchvision
 #Import Dataset
 data = torch.load("pytorch.pt")
 # 2694 x 3 x 260 x 346
-batch_size = 2
+batch_size = 5
 train_loader = torch.utils.data.DataLoader(
         dataset = data,
         batch_size = batch_size, 
