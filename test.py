@@ -17,14 +17,12 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
         reconstructed_batches = []
         avg_loss = 0
         in_channels = 1  # Assuming grayscale video frames
-        losses = []
         model_path = os.path.join('models', model_name)
 
         model = Autoencoder(in_channels, codebook_length, device, batch_size).to(device) #Intialize Model
 
         model.load_state_dict(torch.load(model_path))
-        model.set_tau(10**7)
-        
+
         loss_fn = nn.MSELoss() #Intialize Loss Function
 
         #Convert model to eval
@@ -51,7 +49,6 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
             if (batch_num % num_every_video == 0):
                 original_batches.append(torch.permute(batch, (0,2,1,3,4)))
                 reconstructed_batches.append(torch.permute(reconstructed, (0,2,1,3,4)))
-
 
             #Setting Number of Batches to Test
             if ((batch_num  + 1) == num_testBatches):

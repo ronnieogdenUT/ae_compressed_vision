@@ -16,17 +16,15 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
     #Iterating Through Dataloader
     for (batch_num, batch) in enumerate(dataloader):
         batch = batch.to(device)
-        #print("Batch: " + str(batch_num + 1))
-        #if (batch_num % 20 == 0):
-        #     print ("Batch: " + str(batch_num))
-        #    print("Current Loss: " + str(tot_loss))
+
+        model.set_tau(10**7)
 
         #Convert Int8 Tensor to NP-usable Float32
         batch = batch.to(torch.float32)
 
         #Shift Tensor from size (16,20,1,64,64) to size(16,1,20,64,64)
         batch = torch.permute(batch, (0,2,1,3,4))
-        
+
         # Output of Autoencoder
         reconstructed = model(batch)
         
@@ -42,7 +40,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
         # The gradients are set to zero, the gradient is computed and stored.
         # .step() performs parameter update
         optimizer.zero_grad()
-        #model.set_tau(1)
+        model.set_tau(1)
         loss.backward()
         optimizer.step()
         
