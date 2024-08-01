@@ -7,14 +7,12 @@ from torchvision import datasets
 import time
 from datetime import timedelta
 import os
+import torchvision
 
-#Import MovingMNIST Dataset
-data = datasets.MovingMNIST(
-    root = "./data", 
-    download = True
-)
-# 10,000 x 20 x 1 x 64 x 64
-batch_size = 1
+#Import Dataset
+data = torch.load("pytorch.pt")
+# 2694 x 3 x 260 x 346
+batch_size = 2
 train_loader = torch.utils.data.DataLoader(
         dataset = data,
         batch_size = batch_size, 
@@ -23,7 +21,7 @@ train_loader = torch.utils.data.DataLoader(
     )
 
 in_channels = 1
-codebook_length = 128
+codebook_length = 4
 #Check CUDA Availability
 device = (
     "cuda"
@@ -35,7 +33,7 @@ device = (
 print(f"Using {device} device")
 
 #Create and IMPORT MODEL
-model_name = "model128.pth"
+model_name = "model4.pth"
 model_path = os.path.join('models', model_name)
 model = Autoencoder(in_channels, codebook_length, device, batch_size).to(device) #Intialize Model
 model.load_state_dict(torch.load(model_path))
@@ -43,12 +41,10 @@ model.eval()
 i=0
 for video in train_loader:
     while True:
-        #Input 1 x Frames x C x L x W
-        frameSet = torch.permute(video, (1,0,2,3,4)) #Change to Frames x 1 x C x L x W
-        frameSet = frameSet[0:2, :] #Cut it to 2 x 1 x C x L x W
-        frameSet = torch.permute(frameSet, (1,2,0,3,4)) #Permute it to B x C x 2 x 64 x 64
+        #Input 2 Frames x C x L x W
         frameSet = frameSet.to(device)
         frameSet = frameSet.to(torch.float32)
+        frameSet = torchvision.transforms.functional.rgb_to_grayscale(frameSet, num_output_channels = 1)
         start = time.perf_counter()
         reconstructed = model(frameSet)
         end = time.perf_counter()
