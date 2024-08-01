@@ -13,12 +13,12 @@ def train_rate_distortion(train_loader, test_loader, model_name, codebook_length
     first = True
     last_loss = 1000000
     curr_loss = 5
-    print ("Training L = " + str(codebook_length))
     model_codename = model_name + str(codebook_length)
     last_loss_increase = False
     overfit = False
-    #train(train_loader, model_codename, codebook_length, device, model_exist, is_show, epochs, batch_size)
-    #print("Initial Training Loop Done")
+
+    print ("Training L = " + str(codebook_length))
+
     while (abs(last_loss-curr_loss)/last_loss > 0.1 and overfit == False):
         start = time.perf_counter()
         if (first):
