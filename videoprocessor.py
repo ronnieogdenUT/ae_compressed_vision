@@ -45,6 +45,7 @@ for video in train_loader:
         #Permute to 2 x C x L x W
         frameSet = video.to(device)
         frameSet = frameSet.to(torch.float32)
+        print(frameSet.shape)
         frameSet = torch.permute(frameSet, (0, 2, 3, 1))
         print(frameSet.shape)
         frameSet = torchvision.transforms.functional.rgb_to_grayscale(frameSet, num_output_channels = 1)
