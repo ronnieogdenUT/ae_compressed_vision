@@ -41,9 +41,11 @@ model.eval()
 i=0
 for video in train_loader:
     while True:
-        #Input 2 Frames x C x L x W
+        #Input 2 Frames x L x W x C
+        #Permute to 2 x C x L x W
         frameSet = video.to(device)
         frameSet = frameSet.to(torch.float32)
+        frameSet = torch.permute(frameSet, (0, 2, 3, 1))
         print(frameSet.shape)
         frameSet = torchvision.transforms.functional.rgb_to_grayscale(frameSet, num_output_channels = 1)
         start = time.perf_counter()
