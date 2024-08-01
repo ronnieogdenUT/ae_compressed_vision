@@ -44,10 +44,12 @@ for video in train_loader:
         #Input 2 Frames x L x W x C
         #Permute to 2 x C x L x W
         frameSet = video.to(device)
+        start = time.perf_counter()
         frameSet = frameSet.to(torch.float32)
         frameSet = torch.permute(frameSet, (0, 3, 1, 2))
         frameSet = torchvision.transforms.functional.rgb_to_grayscale(frameSet, num_output_channels = 1)
-        start = time.perf_counter()
+        print(frameSet.shape)
+        frameSet = torch.permute(frameSet, (0, 3, 1, 2))
         reconstructed = model(frameSet)
         end = time.perf_counter()
         print("Time Elapsed: " + str(timedelta(seconds = end-start)))
