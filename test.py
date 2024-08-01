@@ -9,7 +9,6 @@ import os
 #Test Method to test Accuracy of Model's Predictions
 def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
     model_name = model_name + '.pth'
-    model.eval()
     with torch.no_grad(): 
         num_testBatches = int(100/batch_size) #How Many Batches to Run Through, Max = 2,000
         num_videos_show = 10 #How many Videos to Show at End
@@ -28,7 +27,7 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
         loss_fn = nn.MSELoss() #Intialize Loss Function
 
         #Convert model to eval
-        #model.eval()
+        model.eval()
 
         for (batch_num, batch) in enumerate(dataloader):
             if is_show: print ("Batch: " + str(batch_num+1))
