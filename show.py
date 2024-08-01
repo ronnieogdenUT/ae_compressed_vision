@@ -26,9 +26,12 @@ def show(original_batchList, reconstructed_batchList):
 
             #append frame to frame list
             ims.append([im1, im2])
+        print("Hello")
+    print("Hello1")
 
     #create video from frame list
     ani = animation.ArtistAnimation(fig, ims, interval = 50, repeat_delay = 1000)
+    print("Hello2")
 
     #display video
     plt.show()
