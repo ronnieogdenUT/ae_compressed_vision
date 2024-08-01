@@ -42,7 +42,7 @@ i=0
 for video in train_loader:
     while True:
         #Input 2 Frames x C x L x W
-        frameSet = frameSet.to(device)
+        frameSet = video.to(device)
         frameSet = frameSet.to(torch.float32)
         frameSet = torchvision.transforms.functional.rgb_to_grayscale(frameSet, num_output_channels = 1)
         start = time.perf_counter()
