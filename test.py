@@ -23,6 +23,7 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
         model = Autoencoder(in_channels, codebook_length, device, batch_size).to(device) #Intialize Model
 
         model.load_state_dict(torch.load(model_path))
+        model.set_tau(10**7)
         
         loss_fn = nn.MSELoss() #Intialize Loss Function
 
