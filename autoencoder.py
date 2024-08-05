@@ -122,7 +122,7 @@ class Autoencoder(torch.nn.Module):
         x = self.decoderConv3(x)
         x = self.decoderBn3(x)
 
-        del quantized_x
+        #del quantized_x
         
         return x
     
