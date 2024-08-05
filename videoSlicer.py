@@ -7,6 +7,7 @@ import numpy as np
 import dv_processing as dv
 from datetime import timedelta
 import matplotlib.pyplot as plt
+from autoencoder import Autoencoder
 
 file_name = "inivation_front_view.aedat4"
 
@@ -37,21 +38,37 @@ slicer = dv.EventStreamSlicer()
 def add_frame(event_slice: dv.EventStore):
     image = visualizer.generateImage(event_slice)
     video.append(image)
+    
+ # Convert image to the required format for the autoencoder (e.g., torch tensor)
+    image_tensor = torch.tensor(image, dtype=torch.float32).to(device)
+    
+    # Normalize the image tensor to the range [0, 1]
+    image_tensor = image_tensor / 255.0
+
+    # Pass the image through the autoencoder
+    with torch.no_grad():
+        output = Autoencoder(image_tensor)
+    
+    # Handle the output (e.g., convert back to numpy and visualize)
+    output_image = output.squeeze().cpu().numpy()
+    
+    # Append the output image to the video list
+    video.append(output_image)
 
 # Register this method to be called every 33 millisecond worth of event data
 slicer.doEveryTimeInterval(timedelta(milliseconds=33), add_frame)
 
-# Run the loop while file is still running
-while reader.isRunning():
-    # Read batch of events
-    events = reader.getNextEventBatch()
+# # Run the loop while file is still running
+# while reader.isRunning():
+#     # Read batch of events
+#     events = reader.getNextEventBatch()
     
-    # Read a frame from the camera
-    if events is not None:
-        # Filter noise events
-        filter.accept(events)
-        filter_events = filter.generateEvents()
-        slicer.accept(filter_events)
+#     # Read a frame from the camera
+#     if events is not None:
+#         # Filter noise events
+#         filter.accept(events)
+#         filter_events = filter.generateEvents()
+#         slicer.accept(filter_events)
 
 # Convert the array to a numpy array
 arr = np.array(video)
