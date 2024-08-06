@@ -195,7 +195,7 @@ class Autoencoder(torch.nn.Module):
         #Multiplies Qs(L x 16 x 32 x 20 x 8 x 8) and centroids(L x 16 x 32 x 20 x 8 x 8) and converts to tensor
 
         #Now we have the L x 16 x 32 x 20 x 8 x 8, which should entirely be one codebook value with 
-        quantized_x = torch.sum(quantized_x, dim=-1)
+        quantized_x = torch.sum(Qs, dim=-1)
 
         #Reduced down to the one codebook value
         #Cleanup
