@@ -9,6 +9,7 @@ import matplotlib.animation as animation
 import math
 #from pytorch_msssim import ms_ssim
 from torch.utils.data.sampler import SubsetRandomSampler
+import videoSlicer
 import gc
 import sys
 from train import train
@@ -16,7 +17,8 @@ from test import test
 torch.cuda.empty_cache()
 
 #Import MovingMNIST Dataset
-data = "inivation_front_view.aedat4"
+data = "inivation_front_view.aedat4" 
+videoSlicer(data)
  # datasets.MovingMNIST(
  #    root = "./data", 
  #    download = True
