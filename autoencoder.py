@@ -178,16 +178,17 @@ class Autoencoder(torch.nn.Module):
     
     def quantize(self, x):
         quantized_shape = list(x.shape)
-        quantized_shape.insert(0, self.codebook_length)
+        quantized_shape.append(self.codebook_length)
 
         #Qs = torch.ones(quantized_shape, device = self.device)
         #Qh = torch.ones(quantized_shape, device = self.device)
+        distances = torch.ones(quantized_shape, device = self.device)
 
         for i in range(self.codebook_length):
-            distance = abs(torch.unsqueeze(x, -1) - self.centroids[i])
+            distances[...,i] = abs(torch.unsqueeze(x, -1) - self.centroids[i])
 
-        Qs = torch.softmax(distance, dim = -1)
-        Qh = torch.min(distance, dim = -1, keepdim=True)[0]
+        Qs = torch.softmax(distances, dim = -1)
+        Qh = torch.min(distances, dim = -1, keepdim=True)[0]
         
         #Set up for centroid multiplication
         #Qs = Qs * self.centroids #torch.permute(Qs, (1, 2, 3, 4, 0, 5)) * self.centroids
