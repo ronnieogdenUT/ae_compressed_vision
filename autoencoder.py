@@ -186,10 +186,14 @@ class Autoencoder(torch.nn.Module):
             Qs[i] = torch.exp(-self.tau*distance)
             Qh[i] = torch.exp(-self.hardTau * distance)
 
-        Qs = torch.softmax(Qs, dim = 0) * self.centroids
+        Qs = torch.softmax(Qs, dim = 0)
         Qh = torch.softmax(Qh, dim = 0)
         Sh = torch.argmax(Qh, dim = 0)
-        Qh = f.one_hot(Sh, num_classes = self.codebook_length) * self.centroids
+        Qh = f.one_hot(Sh, num_classes = self.codebook_length)
+
+        for i in range(self.codebook_length):
+            Qs[i] = Qs[i] * self.centroids[i]
+            Qh[i] = Qh[i] * self.centroids[i]
         
         Qs = torch.sum(Qs, dim=0)
         Qh = torch.sum(Qh, dim=0)
