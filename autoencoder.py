@@ -122,7 +122,7 @@ class Autoencoder(torch.nn.Module):
         x = self.decoderConv3(x)
         x = self.decoderBn3(x)
 
-        #del quantized_x
+        del quantized_x
         
         return x
     
@@ -180,7 +180,7 @@ class Autoencoder(torch.nn.Module):
         quantized_shape.insert(-1, self.codebook_length)
 
         Qs = torch.ones(quantized_shape, device = self.device)
-        #print(Qs.shape)
+        print(Qs.shape)
         for i in range(self.codebook_length):
             distance = (abs(x - self.centroids[i]))
             Qs[...,i] = torch.exp(-self.tau*distance)
