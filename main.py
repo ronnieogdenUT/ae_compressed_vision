@@ -16,10 +16,11 @@ from test import test
 torch.cuda.empty_cache()
 
 #Import MovingMNIST Dataset
-data = datasets.MovingMNIST(
-    root = "./data", 
-    download = True
-)
+data = "inivation_front_view.aedat4"
+ # datasets.MovingMNIST(
+ #    root = "./data", 
+ #    download = True
+# )
 
 #Split into Training and Test Datasets
 test_split = 0.2
