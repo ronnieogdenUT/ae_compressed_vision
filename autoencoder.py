@@ -182,7 +182,7 @@ class Autoencoder(torch.nn.Module):
         Qs = torch.ones(quantized_shape, device = self.device)
         Qh = torch.ones(quantized_shape, device = self.device)
         for i in range(self.codebook_length):
-            print("i: " + i)
+            print("i: " + str(i))
             distance = torch.square(abs(x - self.centroids[i, :]))
             Qs[i] = torch.exp(-self.tau*distance)
             Qh[i] = torch.exp(-self.hardTau * distance)
@@ -193,7 +193,7 @@ class Autoencoder(torch.nn.Module):
         Qh = f.one_hot(Sh, num_classes = self.codebook_length)
 
         for j in range(self.codebook_length):
-            print(":j " + j)
+            print(":j " + str(j))
             Qs[j] = Qs[j] * self.centroids[j]
             Qh[j] = Qh[j] * self.centroids[j]
         
