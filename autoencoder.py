@@ -182,6 +182,8 @@ class Autoencoder(torch.nn.Module):
 
         #Qs = torch.ones(quantized_shape, device = self.device)
         #Qh = torch.ones(quantized_shape, device = self.device)
+        print(x.shape)
+        print(self.centroids.shape)
 
         distance = abs(x - self.centroids)
         print(distance.shape)
