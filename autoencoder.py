@@ -193,12 +193,8 @@ class Autoencoder(torch.nn.Module):
         #Qs = Qs * self.centroids #torch.permute(Qs, (1, 2, 3, 4, 0, 5)) * self.centroids
         #Qh = Qh * self.centroids #torch.permute(Qh, (1, 2, 3, 4, 0, 5)) * self.centroids
 
-        print(Qs.shape)
-        print(Qh.shape)
         Qs = torch.sum(Qs, dim=-1)
         Qh = torch.sum(Qh, dim=-1)
-        print(Qs.shape)
-        print(Qh.shape)
 
         quantized_x = Qs + (Qh.detach() - Qs.detach())
 
