@@ -185,7 +185,8 @@ class Autoencoder(torch.nn.Module):
         print(x.shape)
         print(self.centroids.shape)
 
-        distance = abs(x - self.centroids)
+        for i in range(self.codebook_length):
+            distance = abs(torch.unsqueeze(x) - self.centroids[i])
         print(distance.shape)
 
         Qs = torch.softmax(distance, dim = 0)
