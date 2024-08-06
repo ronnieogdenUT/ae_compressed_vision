@@ -88,22 +88,17 @@ class Autoencoder(torch.nn.Module):
 
     def forward(self, x):
         stride = (1,2,2)
-        print("Hi 1")
 
         #Encoder
         x = f.pad(x, self.same_pad(x, stride, 5))
         x = self.encoderConv1(x)
         x = self.encoderBn1(x)
         x = f.relu(x)
-
-        print("Hi 2")
         
         x = f.pad(x, self.same_pad(x, stride, 5))
         x = self.encoderConv2(x)
         x = self.encoderBn2(x)
         x = f.relu(x)
-
-        print("Hi 3")
 
         #x = self.resblock_c(x)
 
@@ -111,19 +106,13 @@ class Autoencoder(torch.nn.Module):
         x = self.encoderConv3(x)
         x = self.encoderBn3(x)
 
-        print("Hi 4")
-
         #Quantize
         quantized_x = self.quantize(x)
-
-        print("Hi 5")
 
         #Decoder
         x = self.decoderConv1(quantized_x)
         x = self.decoderBn1(x)
         x = f.relu(x)
-
-        print("Hi 6")
 
         #x = self.resblock_c(x)
 
@@ -131,12 +120,8 @@ class Autoencoder(torch.nn.Module):
         x = self.decoderBn2(x)
         x = f.relu(x)
 
-        print("Hi 7")
-
         x = self.decoderConv3(x)
         x = self.decoderBn3(x)
-
-        print("Hi 8")
 
         del quantized_x
         
