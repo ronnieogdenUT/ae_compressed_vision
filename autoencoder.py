@@ -57,14 +57,13 @@ class resblock_c(torch.nn.Module):
 class Autoencoder(torch.nn.Module):
     def __init__(self, in_channels, codebook_length, device, batch_size):
         super().__init__()
-        self.tau = 1
-        self.hardTau = 10**7
         self.device = device
         self.batch_size = batch_size
         #z output from encoder as B x D x Channels x L x W
         #Initialize centroids to Lx 16 x 32 x 20 x 8 x 8
         self.centroids = nn.Parameter(torch.ones((codebook_length,1), dtype = torch.float32).to(device))
         torch.nn.init.kaiming_uniform_(self.centroids, mode="fan_in", nonlinearity="relu")
+        self.centroids = torch.squeeze(self.centroids)
         self.codebook_length = codebook_length
 
         #Encoder
@@ -179,17 +178,15 @@ class Autoencoder(torch.nn.Module):
     def quantize(self, x):
         quantized_shape = list(x.shape)
         quantized_shape.insert(0, self.codebook_length)
-        Qs = torch.ones(quantized_shape, device = self.device)
-        Qh = torch.ones(quantized_shape, device = self.device)
-        for i in range(self.codebook_length):
-            distance = torch.square(abs(x - self.centroids[i, :]))
-            Qs[i] = torch.exp(-self.tau*distance)
-            Qh[i] = torch.exp(-self.hardTau * distance)
 
-        Qs = torch.softmax(Qs, dim = 0)
-        Qh = torch.softmax(Qh, dim = 0)
-        Sh = torch.argmax(Qh, dim = 0)
-        Qh = f.one_hot(Sh, num_classes = self.codebook_length)
+        #Qs = torch.ones(quantized_shape, device = self.device)
+        #Qh = torch.ones(quantized_shape, device = self.device)
+
+        distance = abs(x - self.centroids)
+        print(distance.shape)
+
+        Qs = torch.softmax(distance, dim = 0)
+        Qh = torch.argmin(Qh, dim = 0)
         Qh = torch.permute(Qh, (5, 0, 1, 2, 3, 4))
         
         #Set up for centroid multiplication
