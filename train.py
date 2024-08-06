@@ -18,8 +18,6 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
         #Convert Int8 Tensor to NP-usable Float32
         batch = batch.to(device, dtype = torch.float32)
 
-        model.set_tau(10**7)
-
         #Shift Tensor from size (16,20,1,64,64) to size(16,1,20,64,64)
         batch = torch.permute(batch, (0,2,1,3,4))
 
@@ -38,7 +36,6 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
         # The gradients are set to zero, the gradient is computed and stored.
         # .step() performs parameter update
         optimizer.zero_grad()
-        model.set_tau(1)
         loss.backward()
         optimizer.step()
         

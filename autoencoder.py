@@ -57,7 +57,8 @@ class resblock_c(torch.nn.Module):
 class Autoencoder(torch.nn.Module):
     def __init__(self, in_channels, codebook_length, device, batch_size):
         super().__init__()
-        self.tau = 10**7
+        self.tau = 1
+        self.hardTau = 10**7
         self.device = device
         self.batch_size = batch_size
         #z output from encoder as B x D x Channels x L x W
@@ -177,30 +178,28 @@ class Autoencoder(torch.nn.Module):
     
     def quantize(self, x):
         quantized_shape = list(x.shape)
-        quantized_shape.append(self.codebook_length)
-
+        quantized_shape.insert(0, self.codebook_length)
         Qs = torch.ones(quantized_shape, device = self.device)
-        x = torch.unsqueeze(x, -1)
-        print(x.shape)
+        Qh = torch.ones(quantized_shape, device = self.device)
         for i in range(self.codebook_length):
-            distance = torch.square(abs(x - self.centroids))
-            Qs[...,i] = torch.exp(-self.tau*distance)
+            distance = torch.square(abs(x - self.centroids[i, :]))
+            Qs[i] = torch.exp(-self.tau*distance)
+            Qh[i] = torch.exp(-self.hardTau * distance)
 
-        #Qs = torch.permute(Qs, (1,2,3,4,0,5))
-        #print(Qs.shape)
-
-        Qs = torch.softmax(Qs, dim = -1)
-        Qs = torch.matmul(Qs, self.centroids)
-        #quantized_x = torch.div(Qs, torch.sum(Qs))
+        Qs = torch.softmax(Qs, dim = 0) * self.centroids
+        Qh = torch.softmax(Qh, dim = 0)
+        Sh = torch.argmax(Qh, dim = 0)
+        Qh = f.one_hot(Sh, num_classes = self.codebook_length) * self.centroids
+        
+        Qs = torch.sum(Qs, dim=0)
+        Qh = torch.sum(Qh, dim=0)
+        quantized_x = Qs + (Qh.detach() - Qs.detach())
 
         #Multiply Qs with centroids to get closest Codebook Value
         #Multiplies Qs(L x 16 x 32 x 20 x 8 x 8) and centroids(L x 16 x 32 x 20 x 8 x 8) and converts to tensor
 
         #Now we have the L x 16 x 32 x 20 x 8 x 8, which should entirely be one codebook value with 
-        quantized_x = torch.sum(Qs, dim=-1)
 
         #Reduced down to the one codebook value
-        #Cleanup
-        del Qs
 
         return quantized_x
