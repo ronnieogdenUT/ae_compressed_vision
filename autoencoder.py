@@ -198,9 +198,9 @@ class Autoencoder(torch.nn.Module):
         
         Qs = torch.sum(Qs, dim=0)
         Qh = torch.sum(Qh, dim=0)
-        Qsoft = Qs.clone().detach()
-        Qhard = Qh.clone().detach()
-        quantized_x = Qs + (Qhard - Qsoft)
+        Qsoft = Qs.clone()
+        Qhard = Qh.clone()
+        quantized_x = Qs.clone() + (Qhard.detach() - Qsoft.detach())
 
         #Multiply Qs with centroids to get closest Codebook Value
         #Multiplies Qs(L x 16 x 32 x 20 x 8 x 8) and centroids(L x 16 x 32 x 20 x 8 x 8) and converts to tensor
