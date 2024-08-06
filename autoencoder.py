@@ -189,7 +189,7 @@ class Autoencoder(torch.nn.Module):
 
         Qs = torch.softmax(Qs, dim = -1)
         Qs = torch.matmul(Qs, self.centroids)
-        quantized_x = torch.div(Qs, torch.sum(Qs))
+        #quantized_x = torch.div(Qs, torch.sum(Qs))
 
         #Multiply Qs with centroids to get closest Codebook Value
         #Multiplies Qs(L x 16 x 32 x 20 x 8 x 8) and centroids(L x 16 x 32 x 20 x 8 x 8) and converts to tensor
