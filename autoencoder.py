@@ -191,7 +191,7 @@ class Autoencoder(torch.nn.Module):
         Sh = torch.argmax(Qh, dim = 0)
         Qh = f.one_hot(Sh, num_classes = self.codebook_length)
 
-        for i in range(self.codebook_length):
+        for i in range(self.codebook_length - 1):
             Qs[i] = Qs[i] * self.centroids[i]
             Qh[i] = Qh[i] * self.centroids[i]
         
