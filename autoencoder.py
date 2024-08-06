@@ -190,12 +190,12 @@ class Autoencoder(torch.nn.Module):
         Qh = torch.argmin(distance, dim = -1)
         
         #Set up for centroid multiplication
-        Qs = Qs * self.centroids #torch.permute(Qs, (1, 2, 3, 4, 0, 5)) * self.centroids
-        Qh = Qh * self.centroids #torch.permute(Qh, (1, 2, 3, 4, 0, 5)) * self.centroids
+        #Qs = Qs * self.centroids #torch.permute(Qs, (1, 2, 3, 4, 0, 5)) * self.centroids
+        #Qh = Qh * self.centroids #torch.permute(Qh, (1, 2, 3, 4, 0, 5)) * self.centroids
 
         
-        Qs = torch.sum(torch.permute(Qs, (4, 0, 1, 2, 3, 5)), dim=0)
-        Qh = torch.sum(torch.permute(Qh, (4, 0, 1, 2, 3, 5)), dim=0)
+        Qs = torch.sum(Qs, dim=-1)
+        Qh = torch.sum(Qh, dim=-1)
 
         quantized_x = Qs + (Qh.detach() - Qs.detach())
 
