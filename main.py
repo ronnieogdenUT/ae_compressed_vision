@@ -44,7 +44,7 @@ print(f"Using {device} device")
 
 #Call Main Function
 model_exist = False
-codebook_length = 20
+codebook_length = 128
 epochs = 10
 function_run = sys.argv[1]
 model_name = sys.argv[2]
