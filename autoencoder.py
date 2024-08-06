@@ -187,7 +187,10 @@ class Autoencoder(torch.nn.Module):
         #Qs = torch.permute(Qs, (1,2,3,4,0,5))
         #print(Qs.shape)
 
-        Qs = torch.softmax(Qs, dim = -1) * self.centroids
+        Qs = torch.softmax(Qs, dim = -1)
+        print(Qs.shape)
+        print(self.centroids)
+        Qs = Qs*self.centroids
         quantized_x = torch.div(Qs, torch.sum(Qs))
 
         #Multiply Qs with centroids to get closest Codebook Value
