@@ -187,7 +187,7 @@ class Autoencoder(torch.nn.Module):
             distance = abs(torch.unsqueeze(x, -1) - self.centroids[i])
 
         Qs = torch.softmax(distance, dim = -1)
-        Qh = torch.min(distance, dim = -1)[0]
+        Qh = torch.min(distance, dim = -1, keepdim=True)[0]
         
         #Set up for centroid multiplication
         #Qs = Qs * self.centroids #torch.permute(Qs, (1, 2, 3, 4, 0, 5)) * self.centroids
