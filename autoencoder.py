@@ -200,7 +200,7 @@ class Autoencoder(torch.nn.Module):
         Qs = torch.sum(torch.permute(Qs, (4, 0, 1, 2, 3, 5)), dim=0)
         Qh = torch.sum(torch.permute(Qh, (4, 0, 1, 2, 3, 5)), dim=0)
 
-        quantized_x = Qs.clone() + (Qh.detach() - Qs.detach())
+        quantized_x = Qs + (Qh.detach() - Qs.detach())
 
         #Multiply Qs with centroids to get closest Codebook Value
         #Multiplies Qs(L x 16 x 32 x 20 x 8 x 8) and centroids(L x 16 x 32 x 20 x 8 x 8) and converts to tensor
