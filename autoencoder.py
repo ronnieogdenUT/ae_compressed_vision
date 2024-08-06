@@ -191,6 +191,7 @@ class Autoencoder(torch.nn.Module):
         Sh = torch.argmax(Qh, dim = 0)
         print(Qh.shape)
         Qh = f.one_hot(Sh, num_classes = self.codebook_length)
+        Qh = torch.permute(Qh, (5, 0, 1, 2, 3, 4))
         print(Qh.shape)
 
         for j in range(self.codebook_length):
