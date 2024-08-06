@@ -61,9 +61,10 @@ class Autoencoder(torch.nn.Module):
         self.batch_size = batch_size
         #z output from encoder as B x D x Channels x L x W
         #Initialize centroids to Lx 16 x 32 x 20 x 8 x 8
-        self.centroids = nn.Parameter(torch.ones((codebook_length,1), dtype = torch.float32).to(device))
-        torch.nn.init.kaiming_uniform_(self.centroids, mode="fan_in", nonlinearity="relu")
-        self.centroids = torch.squeeze(self.centroids)
+        centroids = torch.ones(codebook_length,1)
+        torch.nn.init.kaiming_uniform_(centroids, mode="fan_in", nonlinearity="relu")
+        centroids = torch.squeeze(centroids)
+        self.centroids = nn.Parameter(centroids, dtype = torch.float32, device = device)
         self.codebook_length = codebook_length
 
         #Encoder
