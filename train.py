@@ -15,12 +15,10 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
 
     #Iterating Through Dataloader
     for (batch_num, batch) in enumerate(dataloader):
-        batch = batch.to(device)
+        #Convert Int8 Tensor to NP-usable Float32
+        batch = batch.to(device, dtype = torch.float32)
 
         model.set_tau(10**7)
-
-        #Convert Int8 Tensor to NP-usable Float32
-        batch = batch.to(torch.float32)
 
         #Shift Tensor from size (16,20,1,64,64) to size(16,1,20,64,64)
         batch = torch.permute(batch, (0,2,1,3,4))

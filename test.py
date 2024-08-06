@@ -30,10 +30,9 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
 
         for (batch_num, batch) in enumerate(dataloader):
             if is_show: print ("Batch: " + str(batch_num+1))
-            batch = batch.to(device)
 
             #Convert Int8 Tensor to NP-usable Float32
-            batch = batch.to(torch.float32)
+            batch = batch.to(device, dtype = torch.float32)
 
             #Shift Tensor from size (32,20,1,64,64) to size(32,1,20,64,64)
             batch = torch.permute(batch, (0,2,1,3,4))
