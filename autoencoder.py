@@ -180,7 +180,7 @@ class Autoencoder(torch.nn.Module):
         quantized_shape.append(self.codebook_length)
 
         Qs = torch.ones(quantized_shape, device = self.device)
-        torch.unsqueeze(x, -1)
+        x = torch.unsqueeze(x, -1)
         print(x.shape)
         for i in range(self.codebook_length):
             distance = torch.square(abs(x - self.centroids))
