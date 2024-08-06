@@ -185,7 +185,7 @@ class Autoencoder(torch.nn.Module):
         distances = torch.ones(quantized_shape, device = self.device)
 
         for i in range(self.codebook_length):
-            distances[...,i] = abs(torch.unsqueeze(x, -1) - self.centroids[i])
+            distances[...,i] = abs(x - self.centroids[i])
 
         Qs = torch.softmax(distances, dim = -1)
         Qh = torch.min(distances, dim = -1, keepdim=True)[0]
