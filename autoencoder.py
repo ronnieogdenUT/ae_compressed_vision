@@ -182,16 +182,12 @@ class Autoencoder(torch.nn.Module):
 
         #Qs = torch.ones(quantized_shape, device = self.device)
         #Qh = torch.ones(quantized_shape, device = self.device)
-        print(x.shape)
-        print(self.centroids.shape)
 
         for i in range(self.codebook_length):
             distance = abs(torch.unsqueeze(x, -1) - self.centroids[i])
-        print(distance.shape)
 
-        Qs = torch.softmax(distance, dim = 0)
-        Qh = torch.argmin(Qh, dim = 0)
-        Qh = torch.permute(Qh, (5, 0, 1, 2, 3, 4))
+        Qs = torch.softmax(distance, dim = -1)
+        Qh = torch.argmin(distance, dim = -1)
         
         #Set up for centroid multiplication
         Qs = torch.permute(Qs, (1, 2, 3, 4, 0, 5)) * self.centroids
