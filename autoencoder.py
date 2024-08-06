@@ -181,6 +181,7 @@ class Autoencoder(torch.nn.Module):
 
         Qs = torch.ones(quantized_shape, device = self.device)
         torch.unsqueeze(x, -1)
+        print(x.shape)
         for i in range(self.codebook_length):
             distance = torch.square(abs(x - self.centroids))
             Qs[...,i] = torch.exp(-self.tau*distance)
