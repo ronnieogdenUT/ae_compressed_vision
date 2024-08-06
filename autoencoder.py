@@ -188,8 +188,6 @@ class Autoencoder(torch.nn.Module):
         #print(Qs.shape)
 
         Qs = torch.softmax(Qs, dim = -1)
-        print(Qs.shape)
-        print(self.centroids)
         Qs = torch.matmul(Qs, self.centroids)
         quantized_x = torch.div(Qs, torch.sum(Qs))
 
