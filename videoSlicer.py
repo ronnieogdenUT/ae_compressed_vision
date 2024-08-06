@@ -2,7 +2,7 @@
 
 import torch
 import datetime
-import cv
+import cv2 as cv
 import numpy as np
 import dv_processing as dv
 from datetime import timedelta
