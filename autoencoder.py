@@ -109,7 +109,7 @@ class Autoencoder(torch.nn.Module):
         quantized_x = self.quantize(x)
 
         #Decoder
-        x = self.decoderConv1(x)
+        x = self.decoderConv1(quantized_x)
         x = self.decoderBn1(x)
         x = f.relu(x)
 
