@@ -17,8 +17,8 @@ from test import test
 torch.cuda.empty_cache()
 
 #Import MovingMNIST Dataset
-data = "inivation_front_view.aedat4" 
-videoSlicer(data)
+file = "inivation_front_view.aedat4" 
+data = videoSlicer(file)
  # datasets.MovingMNIST(
  #    root = "./data", 
  #    download = True
