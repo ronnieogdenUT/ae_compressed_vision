@@ -186,11 +186,15 @@ class Autoencoder(torch.nn.Module):
             Qs[i] = torch.exp(-self.tau*distance)
             Qh[i] = torch.exp(-self.hardTau * distance)
 
-        Qs = torch.softmax(Qs, dim = 0) * self.centroids
+        Qs = torch.softmax(Qs, dim = 0)
         Qh = torch.softmax(Qh, dim = 0)
         Sh = torch.argmax(Qh, dim = 0)
         Qh = f.one_hot(Sh, num_classes = self.codebook_length)
-        Qh = torch.permute(Qh, (5, 0, 1, 2, 3, 4)) * self.centroids
+        Qh = torch.permute(Qh, (5, 0, 1, 2, 3, 4))
+        
+        #Set up for centroid multiplication
+        Qs = torch.permute(Qs, (1, 2, 3, 4, 5, 0)) * self.centroids
+        Qh = torch.permute(Qs, (1, 2, 3, 4, 5, 0)) * self.centroids
         
         Qs = torch.sum(Qs, dim=0)
         Qh = torch.sum(Qh, dim=0)
