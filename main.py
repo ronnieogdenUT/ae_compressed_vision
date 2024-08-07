@@ -52,7 +52,7 @@ if not(os.path.exists('models')):
     os.mkdir('models')
 files = os.scandir('models')
 for file in files:
-    if (model_name in file.name):
+    if (model_name + ".pth" == file.name):
         model_exist = True
         print("Model Found")
         break

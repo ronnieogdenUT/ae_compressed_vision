@@ -62,6 +62,7 @@ def train(dataloader, model_name, codebook_length, device, model_exist, is_show,
     model = Autoencoder(in_channels, codebook_length, device, batch_size).to(device) #Intialize Model
     if (model_exist == True):
         model.load_state_dict(torch.load(model_path))
+        print("Model Loaded")
 
     loss_fn = nn.MSELoss() #Intialize Loss Function
     optimizer = torch.optim.Adam(model.parameters(), lr = 0.001, betas=(0.9,0.999)) #Intialize Adam Optimizer for model weights
