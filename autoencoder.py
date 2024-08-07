@@ -172,7 +172,8 @@ class Autoencoder(torch.nn.Module):
             return output
     
     def quantize(self, x):
-        quantized_shape = list(x.shape).append(self.codebook_length)
+        quantized_shape = list(x.shape)
+        quantized_shape.append(self.codebook_length)
 
         distances = torch.ones(quantized_shape, device = self.device)
 
