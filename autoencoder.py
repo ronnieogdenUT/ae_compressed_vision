@@ -2,7 +2,6 @@ import torch
 import torch.nn.functional as f
 import torch.nn as nn
 import math
-import os
 
 class resblock_a(torch.nn.Module):
     def __init__(self):
@@ -100,7 +99,7 @@ class Autoencoder(torch.nn.Module):
         x = self.encoderBn2(x)
         x = f.relu(x)
 
-        #x = self.resblock_c(x)
+        x = self.resblock_c(x)
 
         x = f.pad(x, self.same_pad(x, stride, 5))
         x = self.encoderConv3(x)
@@ -114,7 +113,7 @@ class Autoencoder(torch.nn.Module):
         x = self.decoderBn1(x)
         x = f.relu(x)
 
-        #x = self.resblock_c(x)
+        x = self.resblock_c(x)
 
         x = self.decoderConv2(x)
         x = self.decoderBn2(x)
@@ -127,9 +126,6 @@ class Autoencoder(torch.nn.Module):
         
         return x
     
-    def set_tau(self, tau):
-        self.tau = tau
-
     #Calculates Padding(Mimics Tensor Flow padding = 'same')
     def same_pad(self, x, stride, kernel):
         size = x.size()
@@ -147,7 +143,6 @@ class Autoencoder(torch.nn.Module):
             pad_forward = (kernel-1)//2
             pad_backward = (kernel-1)//2
 
-            
             #Regular 2D Padding: Top, Bottom, Left, Right
             pad_along_height = max((out_height - 1) * stride[1] + filter_height - in_height, 0)
             pad_along_width = max((out_width - 1) * stride[2] + filter_width - in_width, 0)
@@ -177,11 +172,8 @@ class Autoencoder(torch.nn.Module):
             return output
     
     def quantize(self, x):
-        quantized_shape = list(x.shape)
-        quantized_shape.append(self.codebook_length)
+        quantized_shape = list(x.shape).append(self.codebook_length)
 
-        #Qs = torch.ones(quantized_shape, device = self.device)
-        #Qh = torch.ones(quantized_shape, device = self.device)
         distances = torch.ones(quantized_shape, device = self.device)
 
         for i in range(self.codebook_length):
@@ -189,21 +181,10 @@ class Autoencoder(torch.nn.Module):
 
         Qs = torch.softmax(distances, dim = -1)
         Qh = torch.min(distances, dim = -1, keepdim=True)[0]
-        
-        #Set up for centroid multiplication
-        #Qs = Qs * self.centroids #torch.permute(Qs, (1, 2, 3, 4, 0, 5)) * self.centroids
-        #Qh = Qh * self.centroids #torch.permute(Qh, (1, 2, 3, 4, 0, 5)) * self.centroids
 
         Qs = torch.sum(Qs, dim=-1)
         Qh = torch.sum(Qh, dim=-1)
 
         quantized_x = Qs + (Qh.detach() - Qs.detach())
-
-        #Multiply Qs with centroids to get closest Codebook Value
-        #Multiplies Qs(L x 16 x 32 x 20 x 8 x 8) and centroids(L x 16 x 32 x 20 x 8 x 8) and converts to tensor
-
-        #Now we have the L x 16 x 32 x 20 x 8 x 8, which should entirely be one codebook value with 
-
-        #Reduced down to the one codebook value
 
         return quantized_x

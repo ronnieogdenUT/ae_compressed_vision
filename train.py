@@ -1,7 +1,6 @@
 import torch
 import matplotlib.pyplot as plt
 import torch.nn as nn
-import gc
 from autoencoder import Autoencoder
 import os
 from show import show
@@ -9,45 +8,40 @@ from show import show
 def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is_show):
     #Initialize Vars
     avg_loss = 0
-    
-
-    #Setting Model Setting to Train
 
     #Iterating Through Dataloader
     for (batch_num, batch) in enumerate(dataloader):
+        #Convert Int8 Tensor to NP-usable Float32
+        batch = batch.to(device, dtype = torch.float32)
 
-        with torch.autograd.set_detect_anomaly(True):
-            #Convert Int8 Tensor to NP-usable Float32
-            batch = batch.to(device, dtype = torch.float32)
+        #Shift Tensor from size (16,20,1,64,64) to size(16,1,20,64,64)
+        batch = torch.permute(batch, (0,2,1,3,4))
 
-            #Shift Tensor from size (16,20,1,64,64) to size(16,1,20,64,64)
-            batch = torch.permute(batch, (0,2,1,3,4))
+        # Output of Autoencoder
+        reconstructed = model(batch)
+        
+        if (is_show and batch_num == 0):
+            original_batch = torch.permute(batch, (0,2,1,3,4))
+            reconstructed_batch = torch.permute(reconstructed, (0,2,1,3,4))
 
-            # Output of Autoencoder
-            reconstructed = model(batch)
-            
-            if (is_show and batch_num == 0):
-                original_batch = torch.permute(batch, (0,2,1,3,4))
-                reconstructed_batch = torch.permute(reconstructed, (0,2,1,3,4))
+        #Calculate Loss
+        loss = loss_fn(reconstructed, batch)
+        avg_loss += loss.item()/train_batches
 
-            #Calculate Loss
-            loss = loss_fn(reconstructed, batch)
-            avg_loss += loss.item()/train_batches
-
-            #Backpropagate
-            # The gradients are set to zero, the gradient is computed and stored.
-            # .step() performs parameter update
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            
-            #Setting Number of Batches per Epoch
-            if ((batch_num  + 1) == train_batches):
-                if is_show:
-                    return avg_loss, original_batch, reconstructed_batch
-                else:
-                    return avg_loss
-                break
+        #Backpropagate
+        # The gradients are set to zero, the gradient is computed and stored.
+        # .step() performs parameter update
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        
+        #Setting Number of Batches per Epoch
+        if ((batch_num  + 1) == train_batches):
+            if is_show:
+                return avg_loss, original_batch, reconstructed_batch
+            else:
+                return avg_loss
+            break
 
 
 def train(dataloader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size):
@@ -83,8 +77,6 @@ def train(dataloader, model_name, codebook_length, device, model_exist, is_show,
     print("Saved Model")
 
     del model
-
-    model_exist = True
     if is_show:
         show(original_batches, reconstructed_batches)
         # Plotting the loss function

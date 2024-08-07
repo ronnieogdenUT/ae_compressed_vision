@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import os
 from train import train
 from test import test
