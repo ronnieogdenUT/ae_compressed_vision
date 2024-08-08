@@ -1,3 +1,8 @@
+# Pendulum class containing all angle calculations
+# Pitch of pendulum is alpha
+# Azimuth of pendulum is psi
+
+# imports
 import numpy as np
 import cv2 as cv
 import dv_processing as dv
@@ -23,6 +28,7 @@ class Pendulum:
         self.calib_mat = calib
         self.dist_coeff = dist
 
+        # Angles
         self.alpha_old = None
         self.psi_deg = None
         self.alpha_deg = None

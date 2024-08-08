@@ -1,3 +1,10 @@
+# Code to control inverted pendulum first by sensor data, then event camera data.
+# Requires file called StateEstimator containing the Pendulum class to exist on path.
+# Adapted from balance_control_rip.py
+# Pitch of pendulum is alpha
+# Azimuth of pendulum is psi
+
+# imports
 import numpy as np
 import cv2 as cv
 import dv_processing as dv
@@ -70,8 +77,8 @@ y_ax = [] # pitch from computer vision
 z_ax = [] # azimuth from computer vision
 weighted_azi = [] # slewed azimuthal measurements
 weighted_pit = [] # slewed pitch measurements
-sen_a_rad = []
-cam_a_rad = []
+sen_a_rad = [] # azimuthal data from sensor in radians
+cam_a_rad = [] # azimuthal data from camera in radians
 
 weight = 0
 
@@ -82,8 +89,8 @@ azi_avg_g = []
 past_pit = []
 pit_avg = 0
 pit_avg_g = []
-n = 17
-n_pit = 90
+n = 30 # values to average over for azimuth
+n_pit = 90 #values to average over for pitch
 
 # Code to control the Rotary Inverted Pendulum
 def control_loop():
@@ -98,13 +105,7 @@ def control_loop():
     count = 0
 
     # Controller gain K adopted from MATLAB/Simulink implementation
-    # limits: theta = 10 dgs / alpha = 5 dgs / theta_dot = 0.4 rads / alpha_dot = 0.3 rads / volt = 0.75
     K = np.array([-5.2612, 30.0353, -2.6407, 3.5405]) # original from slack
-    #K = np.array([-1.09559128758809,	13.9289162172293,	-1.46333425098854,	1.96647670223037])
-    #K = np.array([-1.54495816603853,	14.3203390065466,	-1.54431706920055,	2.04287793434126]) # theta = 8 dgs / theta_dot = 0.65 rads
-    #K = ([-1.57480969149389,	14.4437069362606,	-1.55554430848033,	2.06382093511675]) # theta = 8 dgs / theta_dot = 0.65 rads / volt = 0.9
-    #K = np.array([-1.88670644306782,  16.1111279690849,    -1.74700016025772,     2.27149056520451]) # Q for theta at 100
-    K = np.array([-1.09559128758809,	11.5511299910944,	-1.19299588456263,	1.67239269529754]) 
 
     with RotaryServo() as myRot:
         startTime = 0
@@ -123,18 +124,17 @@ def control_loop():
             # Azi filter
             if len(past_azi) < n and len(past_azi) > 0 and timeStamp > 17:
                 azi_avg = sum(past_azi) / len(past_azi)
-                #azi_avg = obj.psi_deg
             elif len(past_azi) >= n and timeStamp > 17:
                 azi_avg = sum(past_azi[-n:]) / n
 
-            # Pitch filter
+            # Pitch filter-- not currently being used
             if len(past_pit) < n_pit and len(past_pit) > 0 and timeStamp > 17:
                 pit_avg = sum(past_pit) / len(past_pit)
-                #azi_avg = obj.psi_deg
             elif len(past_pit) >= n_pit and timeStamp > 17:
                 pit_avg = sum(past_pit[-n_pit:]) / n_pit
 
             if timeStamp < 17:
+                # Setup time-- sensor data only
                 theta = myRot.motorPosition 
                 alpha_f = myRot.pendulumPosition
                 alpha = np.mod(alpha_f, 2 * np.pi) - np.pi
@@ -144,15 +144,16 @@ def control_loop():
                 azi_avg_g.append(0)
                 pit_avg_g.append(0)
             elif weight <= 1:
-                #theta = ((1 - weight) * myRot.motorPosition) + (weight * azi_avg))
-                theta = ((1 - weight) * myRot.motorPosition) + (weight * obj.psi)
+                # Slewing from sensor to camera data
+                # Azimuth weighting
+                theta = ((1 - weight) * myRot.motorPosition) + (weight * azi_avg)
                 weight = weight + 0.0001
                 weighted_azi.append(theta)
                 if obj.lines == True:
                     past_azi.append(obj.psi)
                 azi_avg_g.append(azi_avg)
 
-                # pitch weighting
+                # Pitch weighting-- not currently being used
                 alpha_f = myRot.pendulumPosition
                 alpha = np.mod(alpha_f, 2 * np.pi) - np.pi
                 alpha_test = ((1 - weight) * alpha) + (weight * math.radians(pit_avg))
@@ -163,12 +164,13 @@ def control_loop():
                     past_pit.append(obj.alpha_deg)
                 pit_avg_g.append(pit_avg)
             else:
+                # Entirely camera data
                 theta = azi_avg
                 weighted_azi.append(0)
                 past_azi.append(obj.psi)
                 azi_avg_g.append(azi_avg)
 
-                # pitch 
+                # Pitch -- currently from sensor readings 
                 alpha_f = myRot.pendulumPosition
                 alpha = np.mod(alpha_f, 2 * np.pi) - np.pi
                 alpha_degrees = pit_avg
@@ -188,8 +190,6 @@ def control_loop():
                 voltage = 0
             else:
                 voltage = -1 * np.dot(K, states)
-                # voltage = np.clip(voltage, -10, 10)
-                # print(voltage)
 
             # Write commands
             myRot.write_voltage(voltage)
@@ -203,23 +203,18 @@ def control_loop():
                 scopeVoltage.sample(timeStamp, [voltage])
 
                 count = 0
-
+                
+            # Appending to plot
             timeStamp = elapsed_time()
             x_ax.append(timeStamp)
             alpha_f = myRot.pendulumPosition
             alpha_mod = np.mod(alpha_f, 2 * np.pi) - np.pi
             sensor_pitch.append(math.degrees(alpha_mod))
-            #sensor_azi.append(math.degrees(states[0]))
             sensor_azi.append(math.degrees(myRot.motorPosition))
             y_ax.append(obj.alpha_deg)
             z_ax.append(obj.psi_deg)
             sen_a_rad.append(myRot.motorPosition)
             cam_a_rad.append(obj.psi)
-            #if obj.psi is not None:
-                #cam_a_rad.append(obj.psi * -1)
-            #else:
-                #cam_a_rad.append(0)
-
 
 slicer = dv.EventStreamSlicer()
 slicer.doEveryTimeInterval(datetime.timedelta(milliseconds=20), obj.getAngles)
@@ -265,17 +260,7 @@ plt.plot(x_ax, pit_avg_g, label = "Moving Average")
 plt.legend()
 plt.show()
 
-# plt.figure(figsize = (10, 5))
-# plt.plot(x_ax, z_ax, label = "Camera")
-# plt.title('Azimuth over Time')
-# plt.xlabel('Time (s)')
-# plt.ylabel('Azimuth (Degrees)')
-# plt.plot(x_ax, sensor_azi, label = "Sensor")
-# plt.plot(x_ax, weighted_azi, label = "Weighted")
-# plt.plot(x_ax, azi_avg_g, label = "Moving Average")
-# plt.legend()
-# plt.show()
-
+# Azimuth plot
 plt.figure(figsize = (10, 5))
 plt.plot(x_ax, cam_a_rad, label = "Camera")
 plt.title('Azimuth over Time')
