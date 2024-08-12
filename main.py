@@ -91,7 +91,7 @@ while True:
             is_show = True
             test(train_loader, model_name, codebook_length, device, is_show, batch_size)
         elif function_run == 'train-rate-distortion':
-            codebook_vals = [128]
+            codebook_vals = [16,64]
             train_rate_distortion(train_loader, test_loader, model_name, codebook_vals[curr_ind], device, batch_size)
             if (curr_ind + 1 != len(codebook_vals)): 
                 curr_ind += 1
