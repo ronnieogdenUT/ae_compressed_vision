@@ -25,7 +25,7 @@ def train_rate_distortion(train_loader, test_loader, model_name, codebook_length
         if (first):
             files = os.scandir('models')
             for file in files:
-                if (model_codename == file.name):
+                if (model_codename + ".pth" == file.name):
                     model_exist = True
                     print("Model Found")
                     break
