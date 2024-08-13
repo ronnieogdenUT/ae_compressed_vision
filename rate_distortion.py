@@ -20,7 +20,7 @@ def train_rate_distortion(train_loader, test_loader, model_name, codebook_length
     i = 1
     initial_loops = 0
 
-    while ((abs(last_loss-curr_loss)/last_loss > 0.01 and overfit == False) or i <= initial_loops):
+    while ((abs(last_loss-curr_loss)/last_loss > 0.001 and overfit == False) or i <= initial_loops):
         start = time.perf_counter()
         if (first):
             files = os.scandir('models')
