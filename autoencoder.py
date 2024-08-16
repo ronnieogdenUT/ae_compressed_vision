@@ -1,15 +1,7 @@
 import torch
-from torchvision import datasets
-import matplotlib.pyplot as plt
-import torchvision.transforms.functional as tf
 import torch.nn.functional as f
-import numpy as np
 import torch.nn as nn
-import matplotlib.animation as animation
 import math
-#from pytorch_msssim import ms_ssim
-from torch.utils.data.sampler import SubsetRandomSampler
-import gc
 
 class resblock_a(torch.nn.Module):
     def __init__(self):
@@ -62,14 +54,16 @@ class resblock_c(torch.nn.Module):
         return out
 
 class Autoencoder(torch.nn.Module):
-    def __init__(self, in_channels, codebook_length, device):
+    def __init__(self, in_channels, codebook_length, device, batch_size):
         super().__init__()
-        self.tau = 10
         self.device = device
+        self.batch_size = batch_size
         #z output from encoder as B x D x Channels x L x W
-        #Initialize centroids to Lx 16 x 32 x 20 x 8 x 8
-        self.centroids = nn.Parameter(torch.ones((codebook_length, 8,32,20,8,8), dtype = torch.float32).to(device))
-        torch.nn.init.kaiming_uniform_(self.centroids, mode="fan_in", nonlinearity="relu")
+        #Initialize centroids to L x 1
+        centroids = torch.ones((codebook_length,1), dtype = torch.float32, device = device)
+        torch.nn.init.kaiming_uniform_(centroids, mode="fan_in", nonlinearity="relu")
+        centroids = torch.squeeze(centroids)
+        self.centroids = nn.Parameter(centroids)
         self.codebook_length = codebook_length
 
         #Encoder
@@ -81,8 +75,7 @@ class Autoencoder(torch.nn.Module):
         self.encoderBn3 = torch.nn.BatchNorm3d(32)  
 
         self.resblock_c = resblock_c()
-        
-        # Figure out if resblock_c needs to be a transposed version... I think they are the same here		
+        	
         #Decoder
         self.decoderConv1 = torch.nn.ConvTranspose3d(32, 128, 3, stride=(1,2,2), padding=1, output_padding=(0,1,1))
         self.decoderBn1 = torch.nn.BatchNorm3d(128)
@@ -127,52 +120,71 @@ class Autoencoder(torch.nn.Module):
 
         x = self.decoderConv3(x)
         x = self.decoderBn3(x)
+
+        del quantized_x
         
         return x
-
-
+    
     #Calculates Padding(Mimics Tensor Flow padding = 'same')
     def same_pad(self, x, stride, kernel):
         size = x.size()
-        in_height = size[4]
-        in_width = size[3]
-        filter_height = kernel
-        filter_width = kernel
 
-        out_height = math.ceil(float(in_height) / float(stride[1]))
-        out_width  = math.ceil(float(in_width) / float(stride[2]))
+        if len(size) == 5: #Batch of Videos: Batch x Channel x Time x Length x Width
+            in_height = size[4]
+            in_width = size[3]
+            filter_height = kernel
+            filter_width = kernel
 
-        #3D Padding: Time Dimension, Front, Back
-        pad_forward = (kernel-1)//2
-        pad_backward = (kernel-1)//2
+            out_height = math.ceil(float(in_height) / float(stride[1]))
+            out_width  = math.ceil(float(in_width) / float(stride[2]))
 
-        
-        #Regular 2D Padding: Top, Bottom, Left, Right
-        pad_along_height = max((out_height - 1) * stride[1] + filter_height - in_height, 0)
-        pad_along_width = max((out_width - 1) * stride[2] + filter_width - in_width, 0)
-        pad_top = pad_along_height // 2
-        pad_bottom = pad_along_height - pad_top
-        pad_left = pad_along_width // 2
-        pad_right = pad_along_width - pad_left
-        output = (pad_left, pad_right, pad_top, pad_bottom, pad_forward, pad_backward)
-        return output
+            #3D Padding: Time Dimension, Front, Back
+            pad_forward = (kernel-1)//2
+            pad_backward = (kernel-1)//2
+
+            #Regular 2D Padding: Top, Bottom, Left, Right
+            pad_along_height = max((out_height - 1) * stride[1] + filter_height - in_height, 0)
+            pad_along_width = max((out_width - 1) * stride[2] + filter_width - in_width, 0)
+            pad_top = pad_along_height // 2
+            pad_bottom = pad_along_height - pad_top
+            pad_left = pad_along_width // 2
+            pad_right = pad_along_width - pad_left
+            output = (pad_left, pad_right, pad_top, pad_bottom, pad_forward, pad_backward)
+            return output
+        else: #Video(Batch of Frames): Batch x Channel x Length x Width
+            in_height = size[3]
+            in_width = size[2]
+            filter_height = kernel
+            filter_width = kernel
+
+            out_height = math.ceil(float(in_height) / float(stride[1]))
+            out_width  = math.ceil(float(in_width) / float(stride[2]))
+            
+            #Regular 2D Padding: Top, Bottom, Left, Right
+            pad_along_height = max((out_height - 1) * stride[1] + filter_height - in_height, 0)
+            pad_along_width = max((out_width - 1) * stride[2] + filter_width - in_width, 0)
+            pad_top = pad_along_height // 2
+            pad_bottom = pad_along_height - pad_top
+            pad_left = pad_along_width // 2
+            pad_right = pad_along_width - pad_left
+            output = (pad_left, pad_right, pad_top, pad_bottom)
+            return output
     
     def quantize(self, x):
-        centroids = self.centroids
+        quantized_shape = list(x.shape)
+        quantized_shape.append(self.codebook_length)
 
-        Qs = torch.ones(centroids.shape).to(self.device)
+        distances = torch.ones(quantized_shape, device = self.device)
+
         for i in range(self.codebook_length):
-            distance = (abs(x - centroids[i, :]))
-            Qs[i] = torch.exp(-self.tau*distance)
+            distances[...,i] = abs(x - self.centroids[i])
 
-        quantized_x = (Qs * centroids)/torch.sum(Qs)
+        Qs = torch.softmax(distances, dim = -1)
+        Qh = torch.min(distances, dim = -1, keepdim=True)[0]
 
-        #Multiply Qs with centroids to get closest Codebook Value
-        #Multiplies Qs(L x 16 x 32 x 20 x 8 x 8) and centroids(L x 16 x 32 x 20 x 8 x 8) and converts to tensor
+        Qs = torch.sum(Qs, dim=-1)
+        Qh = torch.sum(Qh, dim=-1)
 
-        #Now we have the L x 16 x 32 x 20 x 8 x 8, which should entirely be one codebook value with 
-        quantized_x = torch.sum(quantized_x, dim=0)
-
-        #Reduced down to the one codebook value
+        quantized_x = Qs + (Qh.detach() - Qs.detach())
 
         return quantized_x
