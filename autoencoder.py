@@ -59,7 +59,7 @@ class Autoencoder(torch.nn.Module):
         self.device = device
         self.batch_size = batch_size
         #z output from encoder as B x D x Channels x L x W
-        #Initialize centroids to Lx 16 x 32 x 20 x 8 x 8
+        #Initialize centroids to L x 1
         centroids = torch.ones((codebook_length,1), dtype = torch.float32, device = device)
         torch.nn.init.kaiming_uniform_(centroids, mode="fan_in", nonlinearity="relu")
         centroids = torch.squeeze(centroids)
@@ -75,8 +75,7 @@ class Autoencoder(torch.nn.Module):
         self.encoderBn3 = torch.nn.BatchNorm3d(32)  
 
         self.resblock_c = resblock_c()
-        
-        # Figure out if resblock_c needs to be a transposed version... I think they are the same here		
+        	
         #Decoder
         self.decoderConv1 = torch.nn.ConvTranspose3d(32, 128, 3, stride=(1,2,2), padding=1, output_padding=(0,1,1))
         self.decoderBn1 = torch.nn.BatchNorm3d(128)

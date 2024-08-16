@@ -14,7 +14,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
         #Convert Int8 Tensor to NP-usable Float32
         batch = batch.to(device, dtype = torch.float32)
 
-        #Shift Tensor from size (16,20,1,64,64) to size(16,1,20,64,64)
+        #Shift Tensor from size (B,20,1,64,64) to size(B,1,20,64,64)
         batch = torch.permute(batch, (0,2,1,3,4))
 
         # Output of Autoencoder

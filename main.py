@@ -61,7 +61,7 @@ batch_size = 16
 curr_ind = 0
 losses = []
 while True:
-        #Initialize Dataloader over training data
+    #Initialize Dataloader over training data
     train_loader = torch.utils.data.DataLoader(
         dataset = data,
         batch_size = batch_size, 
