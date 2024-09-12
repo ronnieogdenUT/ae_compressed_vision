@@ -11,7 +11,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
 
     #Iterating Through Dataloader
     for (batch_num, batch) in enumerate(dataloader):
-        print ("Batch: " + batch_num, end="")
+        print ("Batch: " + str(batch_num), end="")
         #Convert Int8 Tensor to NP-usable Float32
         batch = batch.to(device, dtype = torch.float32)
 
@@ -28,7 +28,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
         #Calculate Loss
         loss = loss_fn(reconstructed, batch)
         avg_loss += loss.item()/train_batches
-        print ("Loss: " + loss.item())
+        print ("Loss: " + str(loss.item()))
 
         #Backpropagate
         # The gradients are set to zero, the gradient is computed and stored.
