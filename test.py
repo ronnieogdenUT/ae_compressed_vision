@@ -4,6 +4,7 @@ import torch.nn as nn
 from autoencoder import Autoencoder
 from show import show
 import os
+import time
 
 
 #Test Method to test Accuracy of Model's Predictions
@@ -38,7 +39,11 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
             batch = torch.permute(batch, (0,2,1,3,4))
 
             # Output of Autoencoder
+            start = time.perf_counter()
             reconstructed = model(batch)
+            end = time.perf_counter()
+
+            print("Time Elapsed: " + str(timedelta(seconds = end-start)))
 
             #Calculate Loss
             loss = loss_fn(reconstructed, batch).item()
