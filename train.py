@@ -76,7 +76,7 @@ def train(dataloader, model_name, codebook_length, device, model_exist, is_show,
     torch.save(model.state_dict(), model_path)
     print("Saved Model")
 
-    del model
+    #del model
     if is_show:
         show(original_batches, reconstructed_batches)
         # Plotting the loss function

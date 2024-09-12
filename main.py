@@ -89,7 +89,7 @@ while True:
             train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
         elif function_run == 'test':
             is_show = True
-            test(train_loader, model_name, codebook_length, device, is_show, batch_size)
+            test(test_loader, model_name, codebook_length, device, is_show, batch_size)
         elif function_run == 'train-rate-distortion':
             codebook_vals = [2, 4, 8, 16, 32, 64,128]
             train_rate_distortion(train_loader, test_loader, model_name, codebook_vals[curr_ind], device, batch_size)
