@@ -20,7 +20,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
 
         # Output of Autoencoder
         reconstructed = model(batch)
-        for name, param in model.parameters():
+        for name, param in model.named_parameters():
             print (name, param.data)
         
         if (is_show and batch_num == 0):
