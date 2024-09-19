@@ -9,7 +9,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
     #Initialize Vars
     avg_loss = 0
 
-    params = []
+    params = torch.zeros(model.parameters())
 
     #Iterating Through Dataloader
     for (batch_num, batch) in enumerate(dataloader):
@@ -22,8 +22,12 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
 
         # Output of Autoencoder
         reconstructed = model(batch)
+
+        i=0
         for name, param in model.named_parameters():
-            print (name, torch.sum(param.data))
+            print (name, torch.sum(param.data - params[i]))
+            params[i] = param.data
+            i = i + 1
         
         if (is_show and batch_num == 0):
             original_batch = torch.permute(batch, (0,2,1,3,4))
