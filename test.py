@@ -34,7 +34,8 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
             batch = torch.permute(batch, (0,2,1,3,4))
             reconstructed = model(batch)
             end = time.time()
-            if (start-end > 60):
+            print(abs(start-end))
+            if (abs(start-end) > 60):
                 break
 
         #Convert model to eval
