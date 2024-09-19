@@ -27,7 +27,7 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
 
         loss_fn = nn.MSELoss() #Intialize Loss Function
 
-        #Run model with no grad to calibrate running mean/variance for BN layers
+        #Run model with no grad to calibrate running mean/variance for BN layers, 30 seconds currently
         start = time.time()
         for (batch) in dataloader:
             batch = batch.to(device, dtype = torch.float32)
@@ -35,7 +35,7 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
             reconstructed = model(batch)
             end = time.time()
             print(abs(start-end))
-            if (abs(start-end) > 60):
+            if (abs(start-end) > 30):
                 break
 
         #Convert model to eval
