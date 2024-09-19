@@ -30,6 +30,10 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
         #Convert model to eval
         model.eval()
 
+        for module in model.modules():
+            if isinstance(module, torch.nn.BatchNorm3d):  # Or BatchNorm1d depending on your model
+                module.train()  # Keep BatchNorm layers in training mode
+
         for (batch_num, batch) in enumerate(dataloader):
             if is_show: print ("Batch: " + str(batch_num+1))
 
