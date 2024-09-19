@@ -35,7 +35,7 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
             reconstructed = model(batch)
             end = time.time()
             print(abs(start-end))
-            if (abs(start-end) > 30):
+            if (abs(start-end) > 60):
                 break
 
         #Convert model to eval
