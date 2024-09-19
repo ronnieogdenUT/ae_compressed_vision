@@ -30,6 +30,8 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
         #Run model with no grad to calibrate running mean/variance for BN layers
         start = time.time()
         for (batch) in dataloader:
+            batch = batch.to(device, dtype = torch.float32)
+            batch = torch.permute(batch, (0,2,1,3,4))
             reconstructed = model(batch)
             end = time.time()
             if (start-end > 60):
