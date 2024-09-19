@@ -9,7 +9,7 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
     #Initialize Vars
     avg_loss = 0
 
-    params = torch.zeros(model.parameters())
+    params = torch.zeros(model.parameters().size)
 
     #Iterating Through Dataloader
     for (batch_num, batch) in enumerate(dataloader):
