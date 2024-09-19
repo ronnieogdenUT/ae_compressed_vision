@@ -20,6 +20,8 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
 
         # Output of Autoencoder
         reconstructed = model(batch)
+        for name, param in model.parameters():
+            print (name, param.data)
         
         if (is_show and batch_num == 0):
             original_batch = torch.permute(batch, (0,2,1,3,4))
