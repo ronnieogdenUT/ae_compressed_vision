@@ -60,7 +60,7 @@ for file in files:
 batch_size = 16 #1
 curr_ind = 0
 losses = []
-while True:
+#while True:
     #Initialize Dataloader over training data
     train_loader = torch.utils.data.DataLoader(
         dataset = data,
@@ -111,8 +111,8 @@ while True:
                 plt.show()
         else:
             print("Unknown Function")
-    except RuntimeError:
-        print("CUDA Out of Memory. Decreasing Batch Size by Half. New Batch Size: " + str(batch_size/2))
-        batch_size = int(batch_size/2)
-        continue
-    break
+    # except RuntimeError:
+    #     print("CUDA Out of Memory. Decreasing Batch Size by Half. New Batch Size: " + str(batch_size/2))
+    #     batch_size = int(batch_size/2)
+    #     continue
+    # break
