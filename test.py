@@ -27,12 +27,21 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
 
         loss_fn = nn.MSELoss() #Intialize Loss Function
 
+        #Run model with no grad to calibrate running mean/variance for BN layers
+        start = time.perf_counter()
+        for (batch) in dataloader:
+            reconstructed = model(batch)
+            end = time.perf_counter()
+            if (start-end > 60):
+                break
+
         #Convert model to eval
         model.eval()
 
-        for module in model.modules():
-            if isinstance(module, torch.nn.BatchNorm3d):  # Or BatchNorm1d depending on your model
-                module.train()  # Keep BatchNorm layers in training mode
+        #Set all layers but BN layers to model.eval() and BN on train
+        # for module in model.modules():
+        #     if isinstance(module, torch.nn.BatchNorm3d):  # Or BatchNorm1d depending on your model
+        #         module.train()  # Keep BatchNorm layers in training mode
 
         for (batch_num, batch) in enumerate(dataloader):
             if is_show: print ("Batch: " + str(batch_num+1))
