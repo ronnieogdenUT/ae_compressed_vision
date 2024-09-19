@@ -28,10 +28,10 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
         loss_fn = nn.MSELoss() #Intialize Loss Function
 
         #Run model with no grad to calibrate running mean/variance for BN layers
-        start = time.perf_counter()
+        start = time.time()
         for (batch) in dataloader:
             reconstructed = model(batch)
-            end = time.perf_counter()
+            end = time.time()
             if (start-end > 60):
                 break
 
