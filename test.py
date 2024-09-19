@@ -39,7 +39,7 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
             #Shift tensor to frames first to test latency
             batch = torch.permute(batch, (1,0,2,3,4))
             batch = batch[0:1]
-            print(batch.size)
+            print(batch.shape)
             batch = torch.permute(batch, (1,0,2,3,4))
 
             #Shift Tensor from size (32,20,1,64,64) to size(32,1,20,64,64)
