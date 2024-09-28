@@ -78,8 +78,9 @@ while True:
     )
     try:    
         if function_run == 'train':
-            is_show = False
-            train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
+            while True:
+                is_show = False
+                train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
         elif function_run == 'testTrain':
             is_show = True
             epochs = 1
