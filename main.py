@@ -86,8 +86,9 @@ while True:
             epochs = 1
             train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
         elif function_run == 'showtrain':
-            is_show = True
-            train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
+            while True:
+                is_show = True
+                train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
         elif function_run == 'test':
             is_show = True
             test(test_loader, model_name, codebook_length, device, is_show, batch_size)
