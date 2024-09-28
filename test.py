@@ -18,6 +18,7 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
         original_batches = []
         reconstructed_batches = []
         avg_loss = 0
+        avg_lossEval = 0
         in_channels = 1  # Assuming grayscale video frames
 
 
@@ -27,24 +28,8 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
 
         loss_fn = nn.MSELoss() #Intialize Loss Function
 
-        #Run model with no grad to calibrate running mean/variance for BN layers, 30 seconds currently
-        start = time.time()
-        for (batch) in dataloader:
-            batch = batch.to(device, dtype = torch.float32)
-            batch = torch.permute(batch, (0,2,1,3,4))
-            reconstructed = model(batch)
-            end = time.time()
-            print(abs(start-end))
-            if (abs(start-end) > 60):
-                break
-
         #Convert model to eval
         model.eval()
-
-        #Set all layers but BN layers to model.eval() and BN on train
-        # for module in model.modules():
-        #     if isinstance(module, torch.nn.BatchNorm3d):  # Or BatchNorm1d depending on your model
-        #         module.train()  # Keep BatchNorm layers in training mode
 
         for (batch_num, batch) in enumerate(dataloader):
             if is_show: print ("Batch: " + str(batch_num+1))
@@ -52,14 +37,7 @@ def test(dataloader, model_name, codebook_length, device, is_show, batch_size):
             #Convert Int8 Tensor to NP-usable Float32
             batch = batch.to(device, dtype = torch.float32)
 
-            # #Shift tensor to frames first to test latency
-            # batch = torch.permute(batch, (1,0,2,3,4))
-            # batch = batch[0:1]
-            # print(batch.shape)
-            # batch = torch.permute(batch, (1,0,2,3,4))
-
             #Shift Tensor from size (32,20,1,64,64) to size(32,1,20,64,64)
-            
             batch = torch.permute(batch, (0,2,1,3,4))
 
             # Output of Autoencoder

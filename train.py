@@ -20,11 +20,6 @@ def train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is
 
         # Output of Autoencoder
         reconstructed = model(batch)
-
-        #Check for Weights
-        if batch_num <= 2:
-            for name, param in model.named_parameters():
-                print (name, torch.sum(param.data))
         
         if (is_show and batch_num == 0):
             original_batch = torch.permute(batch, (0,2,1,3,4))
