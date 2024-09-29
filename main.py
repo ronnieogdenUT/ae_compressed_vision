@@ -45,7 +45,7 @@ print(f"Using {device} device")
 #Call Main Function
 model_exist = False
 codebook_length = 128
-epochs = 5
+epochs = 20
 function_run = sys.argv[1]
 model_name = sys.argv[2]
 if not(os.path.exists('models')):
@@ -78,17 +78,17 @@ while True:
     )
     try:    
         if function_run == 'train':
-            while True:
-                is_show = False
-                train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
+            is_show = False
+            epochs = sys.argv[3]
+            train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
         elif function_run == 'testTrain':
             is_show = True
             epochs = 1
             train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
         elif function_run == 'showtrain':
-            while True:
-                is_show = True
-                train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
+            is_show = True
+            epochs = sys.argv[3]
+            train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
         elif function_run == 'test':
             is_show = True
             test(test_loader, model_name, codebook_length, device, is_show, batch_size)
