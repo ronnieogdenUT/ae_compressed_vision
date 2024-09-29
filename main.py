@@ -79,7 +79,7 @@ while True:
     try:    
         if function_run == 'train':
             is_show = False
-            epochs = sys.argv[3]
+            epochs = int(sys.argv[3])
             train(train_loader, model_name, codebook_length, device, model_exist, is_show, epochs, batch_size)
         elif function_run == 'testTrain':
             is_show = True
