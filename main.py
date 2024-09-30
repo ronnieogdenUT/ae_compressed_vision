@@ -97,14 +97,14 @@ elif function_run == 'train-rate-distortion':
     train_rate_distortion(train_loader, test_loader, model_name, codebook_vals[curr_ind], device, batch_size)
     if (curr_ind + 1 != len(codebook_vals)): 
         curr_ind += 1
-        continue
+        #continue
 elif function_run == 'show-rate-distortion':
     codebook_vals = [2, 4, 8, 16, 32, 64, 128]
     loss = show_rate_distortion(test_loader, model_name, codebook_vals[curr_ind], device, batch_size)
     losses.append(loss)
     if (curr_ind + 1 != len(codebook_vals)): 
         curr_ind += 1
-        continue
+        #continue
     else:
         plt.plot(codebook_vals, losses)
         plt.xlabel('Codebook Values')
