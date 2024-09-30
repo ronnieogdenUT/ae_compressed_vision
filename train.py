@@ -75,8 +75,8 @@ def train(dataloader, model_name, codebook_length, device, model_exist, is_show,
         else:
             avg_loss = train_epoch(dataloader, model, loss_fn, optimizer, device, train_batches, is_show)
         losses.append(avg_loss)
-    torch.save(model.state_dict(), model_path)
-    print("Saved Model")
+        torch.save(model.state_dict(), model_path)
+        print("Saved Model")
 
     #del model
     if is_show:
