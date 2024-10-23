@@ -88,4 +88,4 @@ def train(dataloader, model_name, codebook_length, device, model_exist, is_show,
         plt.title('Training Loss')
         plt.show()
     else:
-        return avg_loss
+        return sum(losses)/len(losses)
